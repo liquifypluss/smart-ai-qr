@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { BusinessHeader } from './components/BusinessHeader'
 import { SelectionGrid } from './components/SelectionGrid'
 import { ExperienceRating, type Rating } from './components/ExperienceRating'
-import { ArrowIcon, GoogleIcon, RefreshIcon } from './components/Icons'
+import { ArrowIcon, GoogleIcon, RefreshIcon, WhatsAppIcon } from './components/Icons'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
 import { demoBusiness } from './config/business'
 import { generateReview } from './review/generate'
@@ -106,7 +106,13 @@ export default function App() {
           {manualCopy && <button type="button" className="select-review" onClick={() => { textareaRef.current?.focus(); textareaRef.current?.select() }}>Select review text</button>}
         </div>
       </section>
-      <footer>Powered by <strong>Growthx Media.</strong></footer>
+      <footer className="page-footer">
+        <p>Powered by <strong>AIBawaal</strong></p>
+        <p className="footer-inquiry">Ai Smart Qr for your business?</p>
+        <a className="quote-link" href="https://wa.me/918827982930?text=Hi%20AIBawaal%2C%20I%27m%20interested%20in%20AI%20Smart%20QR%20for%20my%20business.%20Please%20share%20the%20details%20and%20pricing." target="_blank" rel="noopener noreferrer" aria-label="Get a Quote on WhatsApp">
+          <WhatsAppIcon /><span>Get a Quote</span>
+        </a>
+      </footer>
     </div>
   </main>
 }
