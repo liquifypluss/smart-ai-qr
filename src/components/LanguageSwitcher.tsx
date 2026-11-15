@@ -25,6 +25,10 @@ export function LanguageSwitcher({ value, onChange }: { value: Language; onChang
       if (event.key === 'Escape') {
         setOpen(false)
         triggerRef.current?.focus()
+      } else if (event.key === 'Tab') {
+        requestAnimationFrame(() => {
+          if (!rootRef.current?.contains(document.activeElement)) setOpen(false)
+        })
       }
     }
     document.addEventListener('pointerdown', onPointerDown)
@@ -48,9 +52,7 @@ export function LanguageSwitcher({ value, onChange }: { value: Language; onChang
     buttons[next]?.focus()
   }
 
-  return <div className="language-field" ref={rootRef} onBlur={(event) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false)
-  }}>
+  return <div className="language-field" ref={rootRef}>
     <button ref={triggerRef} type="button" className="language-trigger" aria-label={`Review language: ${label}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? 'review-language-options' : undefined} onClick={() => setOpen((current) => !current)} onKeyDown={(event) => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault()
