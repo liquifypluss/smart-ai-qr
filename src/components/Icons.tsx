@@ -31,6 +31,10 @@ export function RefreshIcon(props: IconProps) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7.5 7.5 0 0 1 13-2L20 12M4 12l1.5 5a7.5 7.5 0 0 0 13-2" /></svg>
 }
 
+export function LanguageIcon(props: IconProps) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-3 3-4.5 6-4.5 9s1.5 6 4.5 9c3-3 4.5-6 4.5-9S15 6 12 3Z"/></svg>
+}
+
 export function GoogleIcon(props: IconProps) {
   return <svg viewBox="0 0 28 28" role="img" aria-label="Google" {...props}>
     <circle cx="14" cy="14" r="13.3" fill="#fff" />

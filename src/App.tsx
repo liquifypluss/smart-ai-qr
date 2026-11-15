@@ -3,6 +3,7 @@ import { BusinessHeader } from './components/BusinessHeader'
 import { SelectionGrid } from './components/SelectionGrid'
 import { ExperienceRating, type Rating } from './components/ExperienceRating'
 import { ArrowIcon, GoogleIcon, RefreshIcon } from './components/Icons'
+import { LanguageSwitcher } from './components/LanguageSwitcher'
 import { demoBusiness } from './config/business'
 import { generateReview } from './review/generate'
 import type { Language } from './review/phrases'
@@ -86,20 +87,15 @@ export default function App() {
       <section className="review-section" aria-labelledby="review-heading">
         <div className="review-heading-row">
           <h2 id="review-heading">Your review</h2>
-          <label className="language-field">
-            <span className="sr-only">Review language</span>
-            <select value={language} onChange={(event) => { setLanguage(event.target.value as Language); setFeedback(null) }} aria-label="Review language">
-              <option value="en">English</option>
-              <option value="hi">हिन्दी</option>
-              <option value="hinglish">Hinglish</option>
-            </select>
-          </label>
+          <LanguageSwitcher value={language} onChange={(value) => { setLanguage(value); setFeedback(null) }} />
         </div>
-        <textarea ref={textareaRef} rows={5} lang={language === 'hi' ? 'hi' : 'en'} maxLength={2000} aria-label="Your editable review" value={review} onChange={(event) => { setReview(event.target.value); setFeedback(null); setManualCopy(false) }} spellCheck="true" />
-        <div className="rewrite-row">
-          <button className="rewrite-button" type="button" onClick={rewrite} disabled={rewriting || copying} aria-busy={rewriting}>
-            <RefreshIcon className={rewriting ? 'spin' : ''} />{rewriting ? 'Rewriting...' : 'Rewrite'}
-          </button>
+        <div className="review-editor">
+          <textarea ref={textareaRef} rows={5} lang={language === 'hi' ? 'hi' : 'en'} maxLength={2000} aria-label="Your editable review" value={review} onChange={(event) => { setReview(event.target.value); setFeedback(null); setManualCopy(false) }} spellCheck="true" />
+          <div className="review-tools">
+            <button className="rewrite-button" type="button" onClick={rewrite} disabled={rewriting || copying} aria-busy={rewriting}>
+              <RefreshIcon className={rewriting ? 'spin' : ''} />{rewriting ? 'Rewriting...' : 'Rewrite'}
+            </button>
+          </div>
         </div>
         <button className="primary-button" type="button" onClick={copyAndContinue} disabled={!review.trim() || rewriting || copying}>
           <GoogleIcon /> <span>{copying ? 'Copying...' : 'Copy Review & Continue'}</span><ArrowIcon />
