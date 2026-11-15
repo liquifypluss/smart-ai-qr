@@ -92,9 +92,31 @@ section h2 { margin: 0; color: var(--ink); font-family: var(--font-heading); fon
 
 .rating-section { border-top: 1px solid var(--line); padding-top: 15px; margin-top: 4px; }
 .rating-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin-top: 11px; }
-.rating-option { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 77px; padding: 6px 0; border: 1.5px solid transparent; border-radius: 13px; background: transparent; color: #455064; font-size: var(--font-rating-size); font-weight: 500; line-height: 1.2; transition: border-color var(--ease), background var(--ease), transform var(--ease); }
+.rating-option { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 77px; padding: 6px 0; border: 1.5px solid transparent; border-radius: 13px; background: transparent; color: #455064; font-size: var(--font-rating-size); font-weight: 500; line-height: 1.2; transition: border-color 210ms ease, background 210ms ease, box-shadow 210ms ease, transform var(--ease); }
 .rating-option.is-selected { color: var(--primary); font-weight: 600; }
-.rating-face { width: min(44px, 96%); height: 44px; flex-shrink: 0; }
+.rating-visual { position: relative; display: grid; place-items: center; width: min(44px, 96%); height: 44px; flex: none; }
+.rating-visual::before { content: ''; position: absolute; inset: -2px; border-radius: 50%; background: var(--rating-halo); opacity: 0; transform: scale(.8); pointer-events: none; }
+.rating-face { position: relative; z-index: 1; display: block; width: 100%; height: 100%; transition: transform 170ms ease-out; }
+.rating-option.is-selected .rating-face { animation: rating-pop 350ms cubic-bezier(.22, .8, .32, 1) both; }
+.rating-option.is-selected .rating-visual::before { animation: rating-halo 380ms ease-out both; }
+.rating-option.is-selected .selection-check { animation: rating-check 250ms cubic-bezier(.22, .8, .32, 1) both; }
+@keyframes rating-pop {
+  0% { transform: scale(1) rotate(0); }
+  20% { transform: scale(.94) rotate(-3deg); }
+  53% { transform: scale(1.13) rotate(4deg); }
+  78% { transform: scale(.99) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes rating-halo {
+  0% { transform: scale(.75); opacity: 0; }
+  30% { opacity: .18; }
+  100% { transform: scale(1.38); opacity: 0; }
+}
+@keyframes rating-check {
+  0% { transform: scale(.7); opacity: .4; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 .rating-option .selection-check { top: -5px; right: -4px; width: 20px; height: 20px; }
 
 .review-section { border-top: 1px solid var(--line); margin-top: 13px; padding-top: 14px; }
@@ -132,12 +154,15 @@ footer strong { color: var(--primary); font-weight: 700; }
 
 @media (hover: hover) and (pointer: fine) {
   .brand-card:hover:not(.is-selected), .rating-option:hover:not(.is-selected) { border-color: #a6c6fc; background: #f7faff; }
+  .rating-option:not(.is-selected):hover .rating-face { transform: translateY(-2px) scale(1.04); }
   .show-more:hover { color: #003da5; }
   .rewrite-button:hover:not(:disabled) { background: #e5f0ff; }
   .language-trigger:hover { background: #eef5ff; }
   .language-option:hover { background: #f1f6ff; }
   .primary-button:hover:not(:disabled) { background: #0046c2; box-shadow: 0 5px 13px #0753dd26; }
 }
+.rating-option:active:not(:disabled) { transform: none; }
+.rating-option:active .rating-face { animation: none; transform: scale(.94); }
 @media (min-width: 520px) { .app-shell { margin: 24px auto; min-height: calc(100dvh - 48px); border: 1px solid #e8edf5; border-radius: 22px; } .page-content { padding-right: 23px; padding-left: 23px; } }
 @media (max-width: 340px) {
   .page-content { padding-left: 12px; padding-right: 12px; }
@@ -146,7 +171,7 @@ footer strong { color: var(--primary); font-weight: 700; }
   .brand-card { min-height: 100px; padding-bottom: 5px; }
   .phone-art { height: 68px; }
   .rating-options { gap: 1px; }
-  .rating-face { width: 37px; height: 37px; }
+  .rating-visual { width: 37px; height: 37px; }
   .rating-option { min-height: 68px; }
   .rating-option .selection-check { width: 17px; height: 17px; right: -3px; }
   .rating-option .selection-check svg { width: 11px; }

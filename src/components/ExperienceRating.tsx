@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { CheckIcon } from './Icons'
 
 export type Rating = 1 | 2 | 3 | 4 | 5
@@ -29,9 +30,9 @@ export function ExperienceRating({ selected, onChange }: { selected: Rating | nu
     <div className="rating-options" role="group" aria-label="Rate your experience">
       {ratings.map(({ value, label, color }) => {
         const active = selected === value
-        return <button key={value} type="button" aria-pressed={active} aria-label={`${label}, ${value} out of 5`} className={`rating-option${active ? ' is-selected' : ''}`} onClick={() => onChange(active ? null : value)}>
+        return <button key={value} type="button" aria-pressed={active} aria-label={`${label}, ${value} out of 5`} className={`rating-option${active ? ' is-selected' : ''}`} style={{ '--rating-halo': color } as CSSProperties} onClick={() => onChange(active ? null : value)}>
           {active && <span className="selection-check"><CheckIcon /></span>}
-          <Face rating={value} fill={color} />
+          <span className="rating-visual"><Face rating={value} fill={color} /></span>
           <span>{label}</span>
         </button>
       })}
