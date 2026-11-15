@@ -1,0 +1,33 @@
+name: Verify Coolify staging build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  staging-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run build:staging
+      - name: Verify staging asset paths
+        run: |
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync } from 'node:fs'
+          const html = readFileSync('dist/index.html', 'utf8')
+          const js = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1]
+          const css = html.match(/href="(\/assets\/[^"]+\.css)"/)?.[1]
+          if (!js || !css || !existsSync('dist' + js) || !existsSync('dist' + css) || html.includes('/smart-ai-qr/')) {
+            throw new Error('Staging assets are not served from the site root')
+          }
+          console.log('Staging root-relative asset paths verified')
+          NODE
