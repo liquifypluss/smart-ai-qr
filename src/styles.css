@@ -78,18 +78,13 @@ section h2 { margin: 0; color: var(--ink); font-family: var(--font-heading); fon
 }
 .brand-card.is-selected, .rating-option.is-selected { border-color: #4787ff; background: #eef5ff; box-shadow: 0 0 0 1px #4787ff1c; }
 .phone-art, .choice-image { display: block; width: min(100%, 83px); height: 78px; flex: none; filter: drop-shadow(0 2px 1px #00000012); object-fit: contain; }
-.brand-wordmark { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 17px; max-width: 100%; font-weight: 600; font-size: var(--font-brand-size); line-height: 1.15; letter-spacing: -.015em; text-align: center; overflow-wrap: anywhere; }
-.brand-samsung { font-size: clamp(8px, 2.45vw, 11px); font-weight: 900; color: #1748ac; letter-spacing: .65px; }
-.brand-vivo { font-size: 18px; font-weight: 500; letter-spacing: .35px; color: #2762df; }
-.brand-oppo { font-size: 18px; font-weight: 600; letter-spacing: -.7px; color: #149251; }
-.brand-redmi { font-size: 15px; color: #ff7222; font-weight: 650; }
-.brand-oneplus { font-size: clamp(11px, 3vw, 14px); letter-spacing: -.6px; }
-.brand-oneplus::before { content: '1+'; font-size: 11px; background: #f6373a; padding: 2px 2px 1px; color: white; border-radius: 2px; letter-spacing: -1px; }
-.apple-symbol { width: 14px; height: 17px; }
+.brand-logo-slot { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; min-height: 20px; }
+.brand-logo { display: block; width: 100%; max-width: 90px; height: 20px; object-fit: contain; }
+.brand-fallback-label { font-size: var(--font-brand-size); font-weight: 600; line-height: 1.15; letter-spacing: -.015em; text-align: center; overflow-wrap: anywhere; }
 .selection-check { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; width: 21px; height: 21px; background: var(--primary); color: #fff; border-radius: 50%; box-shadow: 0 0 0 2px #fff; z-index: 2; }
 .selection-check svg { width: 13px; height: 13px; }
-.show-more { display: flex; align-items: center; gap: 2px; margin: 7px 0 8px auto; padding: 0 1px 0 10px; min-height: 44px; border: 0; color: var(--primary); background: transparent; font-size: 13px; font-weight: 600; line-height: 1.2; }
-.show-more svg { width: 15px; height: 15px; transition: transform var(--ease); }
+.show-more { display: flex; align-items: center; gap: 2px; margin: 7px 0 8px auto; padding: 0 1px 0 10px; min-height: 44px; border: 0; color: #6b7280; background: transparent; font-size: 12px; font-weight: 500; line-height: 1.2; }
+.show-more svg { width: 13px; height: 13px; transition: transform var(--ease); }
 .show-more svg.turn-up { transform: rotate(-90deg); }
 
 .rating-section { border-top: 1px solid var(--line); padding-top: 15px; margin-top: 4px; }
@@ -157,7 +152,7 @@ footer strong { color: var(--primary); font-weight: 700; }
 @media (hover: hover) and (pointer: fine) {
   .brand-card:hover:not(.is-selected), .rating-option:hover:not(.is-selected) { border-color: #a6c6fc; background: #f7faff; }
   .rating-option:not(.is-selected):hover .rating-face { transform: translateY(-2px) scale(1.04); }
-  .show-more:hover { color: #003da5; }
+  .show-more:hover { color: #4b5563; }
   .rewrite-button:hover:not(:disabled) { background: #e5f0ff; }
   .language-trigger:hover { background: #eef5ff; }
   .language-option:hover { background: #f1f6ff; }
