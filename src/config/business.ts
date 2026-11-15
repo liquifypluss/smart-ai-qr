@@ -15,6 +15,7 @@ export type BusinessConfig = {
   choiceTitle: string
   primaryColor: string
   logo?: string
+  headerImage?: { src: string; srcSet?: string }
   destinationUrl: string | null
   choices: Choice[]
 }
@@ -27,6 +28,10 @@ export const demoBusiness: BusinessConfig = {
   choiceTitle: 'Which brand do you choose?',
   primaryColor: '#0753dd',
   logo: undefined,
+  headerImage: {
+    src: new URL('../assets/gadget-gallery-header-960.webp', import.meta.url).href,
+    srcSet: `${new URL('../assets/gadget-gallery-header-480.webp', import.meta.url).href} 480w, ${new URL('../assets/gadget-gallery-header-960.webp', import.meta.url).href} 960w`
+  },
   destinationUrl: null,
   choices: [
     { id: 'apple', label: 'Apple', reviewLabel: 'Apple phones', art: 'silver' },
