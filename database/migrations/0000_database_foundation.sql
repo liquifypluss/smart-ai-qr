@@ -109,7 +109,7 @@ CREATE TABLE "business_assets" (
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT "business_assets_choice_owner_fk" FOREIGN KEY ("business_id", "choice_id") REFERENCES "business_choices"("business_id", "id") ON DELETE RESTRICT,
   CONSTRAINT "business_assets_kind_ck" CHECK ("kind" IN ('logo','header_image','choice_image','choice_logo')),
-  CONSTRAINT "business_assets_owner_ck" CHECK (("choice_id" IS NULL AND "kind" IN ('logo','header_image')) OR ("choice_id" IS NOT NULL AND "kind" IN ('choice_image','choice_logo')),
+  CONSTRAINT "business_assets_owner_ck" CHECK (("choice_id" IS NULL AND "kind" IN ('logo','header_image')) OR ("choice_id" IS NOT NULL AND "kind" IN ('choice_image','choice_logo'))),
   CONSTRAINT "business_assets_dimensions_ck" CHECK (("width" IS NULL OR "width" > 0) AND ("height" IS NULL OR "height" > 0))
 );
 --> statement-breakpoint
