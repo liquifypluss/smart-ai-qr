@@ -108,10 +108,12 @@ export default function App() {
       </section>
       <footer className="page-footer">
         <p>Powered by <strong>AIBawaal</strong></p>
-        <p className="footer-inquiry">Ai Smart Qr for your business?</p>
-        <a className="quote-link" href="https://wa.me/918827982930?text=Hi%20AIBawaal%2C%20I%27m%20interested%20in%20AI%20Smart%20QR%20for%20my%20business.%20Please%20share%20the%20details%20and%20pricing." target="_blank" rel="noopener noreferrer" aria-label="Get a Quote on WhatsApp">
-          <WhatsAppIcon /><span>Get a Quote</span>
-        </a>
+        <div className="footer-action-row">
+          <p className="footer-inquiry">Ai Smart Qr for your business?</p>
+          <a className="quote-link" href="https://wa.me/918827982930?text=Hi%20AIBawaal%2C%20I%27m%20interested%20in%20AI%20Smart%20QR%20for%20my%20business.%20Please%20share%20the%20details%20and%20pricing." target="_blank" rel="noopener noreferrer" aria-label="Get a Quote on WhatsApp">
+            <WhatsAppIcon /><span>Get a Quote</span>
+          </a>
+        </div>
       </footer>
     </div>
   </main>
