@@ -34,12 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --prefix database --no-audit --no-fund
-      - name: Export temporary lockfile for verification
-        run: |
-          echo "DB_LOCKFILE_B64_BEGIN"
-          base64 -w 1000 database/package-lock.json
-          echo "DB_LOCKFILE_B64_END"
+      - run: npm ci --prefix database --no-audit --no-fund
       - run: npm run typecheck --prefix database
       - run: npm test --prefix database
       - run: npm install --no-audit --no-fund
