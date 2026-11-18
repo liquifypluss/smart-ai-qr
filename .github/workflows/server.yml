@@ -43,6 +43,23 @@ jobs:
       - run: npm test --prefix server
       - run: npm run build --prefix server
       - run: docker build --file server/Dockerfile --tag smart-ai-qr-api:test .
+      - name: Smoke test container startup
+        run: |
+          docker run --detach --name smart-ai-qr-api-smoke --read-only \
+            -p 127.0.0.1:13000:3000 \
+            -e DATABASE_URL=postgresql://test:test@127.0.0.1:1/disposable_test \
+            -e PUBLIC_API_ORIGIN=https://api.smartqr.liquifyplus.in \
+            -e CORS_ORIGINS=https://smartqr.liquifyplus.in \
+            smart-ai-qr-api:test
+          trap 'docker rm -f smart-ai-qr-api-smoke >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:13000/health | grep -q '"status":"ok"'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs smart-ai-qr-api-smoke
+          exit 1
       - run: npm test --prefix database
       - run: npm install --no-audit --no-fund
       - run: npm test
