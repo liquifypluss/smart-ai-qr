@@ -1,0 +1,53 @@
+name: Verify dynamic frontend API integration
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'scripts/test-dynamic.mjs'
+      - '.github/workflows/frontend-api.yml'
+      - '.env.example'
+      - 'package.json'
+      - 'docs/frontend-api.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    env:
+      VITE_PUBLIC_API_ORIGIN: https://api.smartqr.liquifyplus.in
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:dynamic
+      - run: npm run build:staging
+      - name: Verify root and routed assets
+        run: |
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync } from 'node:fs'
+          const html = readFileSync('dist/index.html', 'utf8')
+          const urls = [...html.matchAll(/(?:src|href)="(\/assets\/[^\"]+)"/g)].map((match) => match[1])
+          if (!urls.length || urls.some((url) => !existsSync(`dist${url}`)) || html.includes('/smart-ai-qr/')) {
+            throw new Error('Invalid staging asset paths')
+          }
+          console.log('Root-relative static assets verified')
+          NODE
+      - name: Verify Vite SPA history fallback
+        run: |
+          npm run preview -- --port 4173 --base=/ &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/b/gadget-gallery | grep -q '<div id="root"></div>'
+          curl -fsS http://127.0.0.1:4173/q/abcdefghijklmnopqrstuvwx | grep -q '<div id="root"></div>'

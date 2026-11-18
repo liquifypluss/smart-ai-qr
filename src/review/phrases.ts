@@ -1,12 +1,14 @@
 export type Language = 'en' | 'hi' | 'hinglish'
 export type Sentiment = 0 | 1 | 2 | 3 | 4 | 5
 
-type PhraseSet = {
+export type PhraseSet = {
   opening: string[]
   details: string[]
   item: string[]
   closing: string[]
 }
+
+export type PhraseLibrarySource = Partial<Record<Language, Partial<Record<Sentiment, Partial<PhraseSet>>>>>
 
 export const phraseLibrary: Record<Language, Record<Sentiment, PhraseSet>> = {
   en: {

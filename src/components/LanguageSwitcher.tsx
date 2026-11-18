@@ -8,12 +8,13 @@ const languages: { value: Language; label: string }[] = [
   { value: 'hinglish', label: 'Hinglish' }
 ]
 
-export function LanguageSwitcher({ value, onChange }: { value: Language; onChange: (value: Language) => void }) {
+export function LanguageSwitcher({ value, available, onChange }: { value: Language; available?: Language[]; onChange: (value: Language) => void }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const label = languages.find((language) => language.value === value)?.label ?? 'English'
+  const options = available ? languages.filter((language) => available.includes(language.value)) : languages
 
   useEffect(() => {
     if (!open) return
@@ -62,7 +63,7 @@ export function LanguageSwitcher({ value, onChange }: { value: Language; onChang
       <LanguageIcon /><span>{label}</span><ChevronIcon className="language-chevron" />
     </button>
     {open && <div id="review-language-options" className="language-menu" ref={menuRef} role="listbox" aria-label="Review language" onKeyDown={moveFocus}>
-      {languages.map((language) => <button key={language.value} type="button" role="option" aria-selected={language.value === value} className="language-option" onClick={() => {
+      {options.map((language) => <button key={language.value} type="button" role="option" aria-selected={language.value === value} className="language-option" onClick={() => {
         onChange(language.value)
         setOpen(false)
         triggerRef.current?.focus()
