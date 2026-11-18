@@ -6,6 +6,7 @@ RUN npm ci --prefix database --no-audit --no-fund && npm ci --prefix server --no
 COPY database/src ./database/src
 COPY server/src ./server/src
 COPY server/tsconfig.json ./server/tsconfig.json
+COPY package.json ./package.json
 COPY src/config/business.ts ./src/config/business.ts
 COPY src/review/phrases.ts ./src/review/phrases.ts
 RUN npm run build --prefix server
