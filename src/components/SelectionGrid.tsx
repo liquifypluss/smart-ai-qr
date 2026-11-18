@@ -3,6 +3,13 @@ import type { BusinessConfig, Choice } from '../config/business'
 import { CheckIcon, ChevronIcon } from './Icons'
 import { PhoneArt } from './PhoneArt'
 
+function ChoiceVisual({ choice }: { choice: Choice }) {
+  const [failed, setFailed] = useState(false)
+  if (choice.imageUrl && !failed) return <img className="choice-image" src={choice.imageUrl} alt="" width={98} height={79} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+  if (choice.art) return <PhoneArt choice={choice} />
+  return <svg className="phone-art" viewBox="0 0 98 79" aria-hidden="true"><rect x="15" y="10" width="68" height="58" rx="13" fill="#e8f1ff"/><path d="M31 25h36M31 38h36M31 51h22" stroke="#78a2ed" strokeWidth="5" strokeLinecap="round"/></svg>
+}
+
 function BrandLogo({ choice, eager }: { choice: Choice; eager: boolean }) {
   const [failed, setFailed] = useState(false)
   return <span className="brand-logo-slot">
@@ -28,11 +35,7 @@ export function SelectionGrid({ business, selected, onChange }: Props) {
         const active = selected === choice.id
         return <button key={choice.id} type="button" className={`brand-card${active ? ' is-selected' : ''}`} aria-label={choice.label} aria-pressed={active} onClick={() => onChange(active ? null : choice.id)}>
           {active && <span className="selection-check"><CheckIcon /></span>}
-          {choice.imageUrl
-            ? <img className="choice-image" src={choice.imageUrl} alt="" loading="lazy" />
-            : choice.art
-              ? <PhoneArt choice={choice} />
-              : <svg className="phone-art" viewBox="0 0 98 79" aria-hidden="true"><rect x="15" y="10" width="68" height="58" rx="13" fill="#e8f1ff"/><path d="M31 25h36M31 38h36M31 51h22" stroke="#78a2ed" strokeWidth="5" strokeLinecap="round"/></svg>}
+          <ChoiceVisual choice={choice} />
           <BrandLogo choice={choice} eager={index < 6} />
         </button>
       })}

@@ -14,7 +14,8 @@ export function generateReview(context: ReviewContext, revision = 0, previous = 
   const defaults = phraseLibrary[language][rating]
   const custom = context.phraseLibrary?.[language]?.[rating]
   const choose = (part: keyof PhraseSet) => {
-    const provided = custom?.[part]?.filter((value) => typeof value === 'string' && value.trim())
+    const values = custom?.[part]
+    const provided = Array.isArray(values) ? values.filter((value) => typeof value === 'string' && value.trim()) : undefined
     return provided?.length ? provided : defaults[part]
   }
   const phrases: PhraseSet = { opening: choose('opening'), details: choose('details'), item: choose('item'), closing: choose('closing') }
