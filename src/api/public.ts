@@ -32,7 +32,8 @@ export function parsePublicPayload(value: unknown): PublicPayload {
     (business.destinationUrl !== null && typeof business.destinationUrl !== 'string')) {
     throw new PublicApiError('network')
   }
-  const languages = supportedLanguages.filter((language) => value.languages.includes(language))
+  const enabled: unknown[] = value.languages
+  const languages = supportedLanguages.filter((language) => enabled.includes(language))
   if (!languages.length) throw new PublicApiError('network')
   return {
     business: business as BusinessConfig,
