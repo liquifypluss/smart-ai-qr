@@ -13,7 +13,7 @@ import type { ServerConfig } from './config.js'
 export async function buildApp(config: ServerConfig, db: Database, pool: pg.Pool, logger = true) {
   const app = Fastify({
     logger: logger ? { level: config.logLevel, redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie', 'databaseUrl'] } : false,
-    trustProxy: config.trustProxy ? 1 : false,
+    trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 1 : false,
     bodyLimit: 16384,
     requestTimeout: 10000,
     connectionTimeout: 10000
@@ -28,8 +28,9 @@ export async function buildApp(config: ServerConfig, db: Database, pool: pg.Pool
   })
   await app.register(rateLimit, { max: config.rateLimit, timeWindow: '1 minute', errorResponseBuilder: () => ({ error: 'Too many requests' }) })
   app.setErrorHandler((error, request, reply) => {
-    if (error.validation) return reply.code(400).send({ error: 'Invalid request' })
-    if (error.statusCode === 429) return reply.code(429).send({ error: 'Too many requests' })
+    const issue = error as { validation?: unknown; statusCode?: number }
+    if (issue.validation) return reply.code(400).send({ error: 'Invalid request' })
+    if (issue.statusCode === 429) return reply.code(429).send({ error: 'Too many requests' })
     request.log.error({ err: error }, 'API request failed')
     return reply.code(500).send({ error: 'Internal server error' })
   })
