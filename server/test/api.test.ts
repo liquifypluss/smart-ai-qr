@@ -120,13 +120,14 @@ test('public API integration', async (t) => {
   })
 
   await t.test('business override and industry phrase fallback do not alter global phrases', async () => {
-    const [business] = await db.insert(businesses).values({ slug: `phrases-${randomUUID()}`, name: 'Demo Restaurant', category: 'restaurant' }).returning()
+    const industry = `restaurant-${randomUUID()}`
+    const [business] = await db.insert(businesses).values({ slug: `phrases-${randomUUID()}`, name: 'Demo Restaurant', category: industry }).returning()
     const id = business.id
     const [originalSettings] = await db.select().from(businesses).where(eq(businesses.id, id))
     assert.ok(originalSettings)
     const { reviewSettings } = await import('../../database/src/schema.js')
     await db.insert(reviewSettings).values({ businessId: id, choiceTitle: 'Choose a dish', languages: ['hi'] })
-    await db.insert(phraseTemplates).values({ industry: 'restaurant', language: 'hi', rating: 5, part: 'opening', phrase: 'Industry phrase', sortOrder: 0 }).onConflictDoNothing()
+    await db.insert(phraseTemplates).values({ industry, language: 'hi', rating: 5, part: 'opening', phrase: 'Industry phrase', sortOrder: 0 })
     let res = await app.inject(`/api/v1/public/businesses/${business.slug}`)
     assert.equal(res.statusCode, 200)
     assert.deepEqual(res.json().phraseLibrary.hi[5].opening, ['Industry phrase'])
