@@ -21,7 +21,7 @@ const config = readConfig({
   DATABASE_URL: url,
   PUBLIC_API_ORIGIN: 'https://api.smartqr.liquifyplus.in',
   CORS_ORIGINS: 'https://smartqr.liquifyplus.in',
-  ASSET_ROOT: resolve('src/assets')
+  ASSET_ROOT: resolve('../src/assets')
 })
 const randomId = () => randomBytes(24).toString('base64url')
 
