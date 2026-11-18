@@ -189,3 +189,15 @@ section h2 { margin: 0; color: var(--ink); font-family: var(--font-heading); fon
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 @supports (-webkit-touch-callout: none) { .review-editor textarea { font-size: 16px; min-height: 155px; } }
+
+.page-loading .business-header { background: #203956; }
+.loading-line { display: block; border-radius: 8px; background: #e5ebf5; }
+.loading-header { width: 58%; height: 22px; background: #ffffff50; }
+.loading-title { width: 55%; height: 20px; margin: 14px 0 12px; }
+.loading-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.loading-card { height: 110px; border: 1px solid #e4e9f1; border-radius: 12px; background: #f3f6fb; }
+.loading-editor { width: 100%; height: 135px; margin-top: 10px; background: #f0f6ff; }
+.page-message { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 30px 24px; text-align: center; }
+.page-message h1 { margin: 0; font-family: var(--font-heading); font-size: 20px; line-height: 1.25; }
+.page-message p { max-width: 310px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.page-retry { min-height: 44px; padding: 0 22px; border: 1px solid #b5cef8; border-radius: 10px; background: #eef5ff; color: var(--primary); font-size: 13px; font-weight: 600; }
