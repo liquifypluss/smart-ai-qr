@@ -1,0 +1,53 @@
+name: Verify public API
+
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'database/**'
+      - 'src/config/business.ts'
+      - 'src/review/phrases.ts'
+      - '.github/workflows/server.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: smart_ai_qr_test
+          POSTGRES_USER: smartqr_test
+          POSTGRES_PASSWORD: smartqr_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U smartqr_test -d smart_ai_qr_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://smartqr_test:smartqr_test@localhost:5432/smart_ai_qr_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci --prefix database --no-audit --no-fund
+      - run: npm install --prefix server --no-audit --no-fund
+      - name: Export temporary lockfile
+        run: |
+          echo 'SERVER_LOCK_BEGIN'
+          base64 -w 1000 server/package-lock.json
+          echo 'SERVER_LOCK_END'
+      - run: npm run typecheck --prefix server
+      - run: npm test --prefix server
+      - run: npm run build --prefix server
+      - run: npm test --prefix database
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run build:staging
