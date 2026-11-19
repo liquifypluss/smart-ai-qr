@@ -33,7 +33,7 @@ with sync_playwright() as playwright:
                   tag: e.tagName, className: typeof e.className === 'string' ? e.className : '',
                   left: Math.round(e.getBoundingClientRect().left), right: Math.round(e.getBoundingClientRect().right),
                   width: Math.round(e.getBoundingClientRect().width)
-                })).filter(x => x.right > window.innerWidth + 1 || x.left < -1).slice(0,20)""")
+                })).filter(x => x.right > window.innerWidth + 1).slice(0,25)""")
                 print('OVERFLOW', name, width, bad, flush=True)
             assert measurements['documentWidth'] <= width + 1, (name, width, measurements)
             assert measurements['heading'], (name, width)
