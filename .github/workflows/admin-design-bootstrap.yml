@@ -1,0 +1,51 @@
+name: Verify Super Admin design foundation
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - '.agents/skills/ui-ux-pro-max/**'
+      - 'docs/admin/**'
+      - 'design-system/aibawaal-super-admin/**'
+      - '.github/workflows/admin-design-bootstrap.yml'
+      - '.github/workflows/admin-design-previews.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  design-foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify official skill and approved design system
+        run: |
+          test -s AGENTS.md
+          test -s .agents/skills/ui-ux-pro-max/SKILL.md
+          test -f .agents/skills/ui-ux-pro-max/scripts/search.py
+          test -s design-system/aibawaal-super-admin/MASTER.md
+          test -s design-system/aibawaal-super-admin/tokens.css
+          test -s design-system/aibawaal-super-admin/tokens.json
+          test -s docs/admin/PAGE-SPEC.md
+          test -s docs/admin/previews/login.html
+          test -s docs/admin/previews/dashboard.html
+          test -s docs/admin/previews/businesses.html
+          python3 .agents/skills/ui-ux-pro-max/scripts/search.py 'admin dashboard' --stack react > /dev/null
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          tokens=json.loads(Path('design-system/aibawaal-super-admin/tokens.json').read_text())
+          assert tokens['color']['nav']['$value'] == '#0F172A'
+          assert tokens['color']['primary']['$value'] == '#0369A1'
+          assert 'APPROVED' in Path('design-system/aibawaal-super-admin/MASTER.md').read_text()
+          assert 'APPROVED' in Path('AGENTS.md').read_text()
+          for page in ('login','dashboard','businesses'):
+              text=Path(f'docs/admin/previews/{page}.html').read_text()
+              assert 'demonstration content only' in text
+              assert 'preview.css' in text
+              assert 'tokens.css' in text
+          print('Approved design foundation verified')
+          PY

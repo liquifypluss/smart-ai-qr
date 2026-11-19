@@ -1,0 +1,37 @@
+## UI Pro Max Search Results
+**Domain:** ux | **Query:** accessible authentication focus validation
+**Source:** ux-guidelines.csv | **Found:** 3 results
+
+### Result 1
+- **Category:** Security / Accessibility
+- **Issue:** Accessible Authentication (Minimum)
+- **Platform:** All
+- **Description:** WCAG 2.2 AA says authentication must not depend only on a cognitive function test unless an exception applies
+- **Do:** Allow password managers and paste; offer passkeys OAuth or another non-cognitive method
+- **Don't:** Block paste or require manual OTP transcription with no alternative
+- **Code Example Good:** autocomplete="current-password" and paste allowed
+- **Code Example Bad:** onpaste preventDefault
+- **Severity:** Critical
+
+### Result 2
+- **Category:** Accessibility
+- **Issue:** Compact Control Semantics
+- **Platform:** Web
+- **Description:** Interactive chips need a native role accessible name state keyboard operation and visible focus
+- **Do:** Prefer a button and expose pressed or selected state that matches the visible label
+- **Don't:** Use a clickable div or reveal the only action on hover
+- **Code Example Good:** <button aria-pressed='true'>Open now</button>
+- **Code Example Bad:** <div class='selected' onclick='toggle()'>Open now</div>
+- **Severity:** Critical
+
+### Result 3
+- **Category:** Forms
+- **Issue:** Inline Validation
+- **Platform:** All
+- **Description:** Validate as user types or on blur
+- **Do:** Validate on blur for most fields
+- **Don't:** Validate only on submit
+- **Code Example Good:** onBlur validation
+- **Code Example Bad:** Submit-only validation
+- **Severity:** Medium
+
