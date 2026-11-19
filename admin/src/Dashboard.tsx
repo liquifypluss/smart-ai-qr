@@ -10,6 +10,7 @@ export function Dashboard({ user, onExpired, onLogout }: { user: Operator; onExp
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [drawer, setDrawer] = useState(false)
+  const [mobile, setMobile] = useState(() => window.matchMedia('(max-width: 1023px)').matches)
   const [loggingOut, setLoggingOut] = useState(false)
   const menuRef = useRef<HTMLButtonElement>(null)
   const sidebarRef = useRef<HTMLElement>(null)
@@ -23,6 +24,13 @@ export function Dashboard({ user, onExpired, onLogout }: { user: Operator; onExp
     }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [onExpired])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)')
+    const update = () => { setMobile(media.matches); if (!media.matches) setDrawer(false) }
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     if (!drawer) return
@@ -57,7 +65,7 @@ export function Dashboard({ user, onExpired, onLogout }: { user: Operator; onExp
 
   return <div className="shell">
     <button className={`backdrop ${drawer ? 'is-open' : ''}`} onClick={() => { setDrawer(false); menuRef.current?.focus() }} aria-label="Close navigation" tabIndex={drawer ? 0 : -1}/>
-    <aside ref={sidebarRef} className={`sidebar ${drawer ? 'is-open' : ''}`} aria-label="Primary navigation">
+    <aside ref={sidebarRef} className={`sidebar ${drawer ? 'is-open' : ''}`} aria-label="Primary navigation" inert={mobile && !drawer}>
       <Brand/>
       <nav className="side-nav" aria-label="Main navigation"><p className="nav-group-title">WORKSPACE</p>{links.map(link => <button key={link.label} className={`nav-link ${link.active ? 'current' : 'admin-disabled'}`} aria-current={link.active ? 'page' : undefined} disabled={!link.active} onClick={() => setDrawer(false)}><Icon name={link.icon}/><span>{link.label}</span></button>)}</nav>
       <div className="sidebar-bottom"><div className="help-link"><Icon name="shield"/><span>Restricted operator access</span></div><div className="operator-mini"><div className="operator-badge">{initials(user.email)}</div><div><strong>{user.email.split('@')[0]}</strong><small>{user.role.replace('_',' ')}</small></div></div><button type="button" className="mobile-logout" disabled={loggingOut} onClick={logout}><Icon name="logout"/> {loggingOut ? 'Signing out…' : 'Sign out'}</button></div>

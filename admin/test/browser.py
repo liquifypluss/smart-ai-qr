@@ -84,6 +84,7 @@ with sync_playwright() as p:
     login.locator('#admin-password').fill('SomeFakeBrowserFixturePassword')
     login.get_by_role('button', name='Sign in to workspace').click()
     login.get_by_role('heading', name='Overview').wait_for()
+    login.get_by_role('button', name='Open navigation').click()
     login.get_by_role('button', name='Sign out').click()
     login.get_by_role('heading', name='Welcome back').wait_for()
     checks += 1
