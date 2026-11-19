@@ -37,7 +37,7 @@ await test('admin authentication and security on isolated PostgreSQL', async (t)
     } finally { await pool.end() }
   })
   const { db, pool } = createDatabase(url)
-  const app = await buildAdminApp(cfg, db, pool, false)
+  const app = await buildAdminApp({ ...cfg, logLevel: 'error' }, db, pool, true)
   await app.ready()
   t.after(async () => { await app.close() })
   const req = (method: 'GET' | 'POST', path: string, headers: Record<string, string> = {}, payload?: object) => app.inject({ method, url: path, headers, payload })
