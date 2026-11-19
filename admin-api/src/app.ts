@@ -26,7 +26,7 @@ const loginBody = {
 export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.Pool, logging = true) {
   const app = Fastify({
     logger: logging ? { level: config.logLevel, redact: ['req.headers.authorization', 'req.headers.cookie', 'req.headers.x-csrf-token', 'res.headers.set-cookie', 'req.body.password', 'databaseUrl'] } : false,
-    trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 1 : false,
+    trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 0 : false,
     bodyLimit: 4096, requestTimeout: 10000, connectionTimeout: 10000
   })
   const dummyHash = await argon2.hash(randomBytes(32), passwordOptions)
@@ -37,7 +37,7 @@ export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.
     origin: (origin, callback) => callback(null, origin === config.webOrigin),
     credentials: true, methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['content-type', 'x-csrf-token'], strictPreflight: true
   })
-  await app.register(rateLimit, { global: false, errorResponseBuilder: () => ({ error: 'Too many requests' }) })
+  await app.register(rateLimit, { global: false, errorResponseBuilder: () => ({ statusCode: 429, error: 'Too many requests' }) })
   app.addHook('onSend', async (_request, reply) => { reply.header('Cache-Control', 'no-store'); reply.header('Pragma', 'no-cache') })
   app.setErrorHandler((error, request, reply) => {
     const issue = error as { validation?: unknown; statusCode?: number }
