@@ -1,54 +1,38 @@
-name: Bootstrap Super Admin UI UX Pro Max design skill
+name: Verify Super Admin design foundation
 on:
-  push:
-    branches:
-      - design/super-admin-foundation
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - '.agents/skills/ui-ux-pro-max/**'
+      - 'docs/admin/**'
+      - 'design-system/aibawaal-super-admin/**'
+      - '.github/workflows/admin-design-bootstrap.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  design-research:
+  design-foundation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install official skill for Codex
-        run: npx --yes ui-ux-pro-max-cli init --ai codex
-      - name: Verify installation and read skill
+      - name: Verify official skill and design research
         run: |
-          test -f .agents/skills/ui-ux-pro-max/SKILL.md
+          test -f AGENTS.md
+          test -s .agents/skills/ui-ux-pro-max/SKILL.md
           test -f .agents/skills/ui-ux-pro-max/scripts/search.py
-          sed -n '1,105p' .agents/skills/ui-ux-pro-max/SKILL.md
-      - name: Generate design research and React guidance
-        run: |
-          mkdir -p docs/admin/design-research
-          skill=".agents/skills/ui-ux-pro-max/scripts/search.py"
-          python3 "$skill" "minimal enterprise SaaS operations dashboard" --design-system -f markdown -p "AIBawaal Clarity" --variance 3 --motion 2 --density 8 > docs/admin/design-research/01-clarity-generated.md
-          python3 "$skill" "professional B2B business management admin" --design-system -f markdown -p "AIBawaal Structured" --variance 4 --motion 2 --density 8 > docs/admin/design-research/02-structured-generated.md
-          python3 "$skill" "modern SaaS workbench data tables" --design-system -f markdown -p "AIBawaal Workbench" --variance 5 --motion 3 --density 7 > docs/admin/design-research/03-workbench-generated.md
-          python3 "$skill" "data tables filtering pagination performance" --stack react > docs/admin/design-research/react-guidelines.txt
-          python3 "$skill" "accessible authentication focus validation" --domain ux > docs/admin/design-research/accessibility-guidelines.txt
-          python3 "$skill" "responsive sidebar navigation dashboard" --domain ux > docs/admin/design-research/navigation-guidelines.txt
-          test -s docs/admin/design-research/01-clarity-generated.md
-          test -s docs/admin/design-research/02-structured-generated.md
-          test -s docs/admin/design-research/03-workbench-generated.md
-      - name: Commit generated skill and research on feature branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .agents/skills/ui-ux-pro-max docs/admin/design-research
-          git diff --cached --name-only | grep -q . || exit 0
-          git diff --cached --quiet && exit 0
-          git -c core.hooksPath=/dev/null commit -m "chore: install UI UX Pro Max Codex skill and generate admin design research"
-          header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $header" push origin "HEAD:${GITHUB_REF_NAME}"
+          test -s design-system/aibawaal-super-admin/PROPOSAL.md
+          test -s docs/admin/PAGE-SPEC.md
+          for file in docs/admin/design-research/*.md; do test -s "$file"; done
+          python3 .agents/skills/ui-ux-pro-max/scripts/search.py "admin dashboard" --stack react >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('design-system/aibawaal-super-admin/MASTER.md')
+          if p.exists():
+              raise SystemExit('Approval gate: MASTER.md must not be committed until direction is approved')
+          print('Design foundation and approval gate verified')
+          PY
