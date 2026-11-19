@@ -28,6 +28,13 @@ with sync_playwright() as playwright:
               markedDemo: document.querySelector('.preview-strip')?.innerText.toLowerCase().includes('demonstration'),
               sheetPresent: [...document.styleSheets].some(s => s.href && s.href.includes('tokens.css'))
             })''')
+            if measurements['documentWidth'] > width + 1:
+                bad = page.evaluate("""() => [...document.querySelectorAll('*')].map(e => ({
+                  tag: e.tagName, className: typeof e.className === 'string' ? e.className : '',
+                  left: Math.round(e.getBoundingClientRect().left), right: Math.round(e.getBoundingClientRect().right),
+                  width: Math.round(e.getBoundingClientRect().width)
+                })).filter(x => x.right > window.innerWidth + 1 || x.left < -1).slice(0,20)""")
+                print('OVERFLOW', name, width, bad, flush=True)
             assert measurements['documentWidth'] <= width + 1, (name, width, measurements)
             assert measurements['heading'], (name, width)
             assert measurements['markedDemo'] is True, (name, width)
