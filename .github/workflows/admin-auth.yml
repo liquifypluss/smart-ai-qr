@@ -61,7 +61,7 @@ jobs:
       - name: Build both Docker images
         run: |
           docker build -f admin-api/Dockerfile -t aibawaal-admin-api:test .
-          docker build -f admin/Dockerfile -t aibawaal-admin:test .
+          docker build --build-arg VITE_ADMIN_API_ORIGIN=https://admin-api.smartqr.liquifyplus.in -f admin/Dockerfile -t aibawaal-admin:test .
       - name: Admin Docker smoke check
         run: |
           docker run -d --name admin-ui-smoke -p 127.0.0.1:18080:8080 aibawaal-admin:test

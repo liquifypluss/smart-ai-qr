@@ -56,8 +56,10 @@ ADMIN_BOOTSTRAP_CONFIRM=CREATE_INITIAL_SUPER_ADMIN \
 ADMIN_BOOTSTRAP_DATABASE_URL='postgresql://bootstrap-role:SECRET@private-postgres:5432/smart_ai_qr_prod' \
 ADMIN_BOOTSTRAP_EMAIL='your-operator@example.com' \
 ADMIN_BOOTSTRAP_PASSWORD_FILE=/run/secrets/first-admin-password \
-npm run bootstrap --prefix admin-api
+node ../dist/admin-api/src/bootstrap.js
 ```
+
+Run this command **inside the built admin API container** using a temporary, explicitly authorized provisioning job and a mounted secret file. Development/source checkouts may use `npm run bootstrap --prefix admin-api` after installing dev dependencies; the production Docker runtime intentionally does not contain `tsx`.
 
 This is a reference command, **not executed**. Supply URLs via a secret store instead of entering them in shell history. The CLI obtains a PostgreSQL advisory transaction lock and rejects bootstrapping when any administrator exists. Remove the bootstrap credentials and password file after success. There are no hardcoded accounts.
 

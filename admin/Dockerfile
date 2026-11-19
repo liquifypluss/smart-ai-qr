@@ -5,7 +5,8 @@ COPY admin/package.json admin/package-lock.json ./admin/
 RUN npm ci --prefix admin --no-audit --no-fund
 COPY design-system/aibawaal-super-admin/tokens.css ./design-system/aibawaal-super-admin/tokens.css
 COPY admin ./admin
-RUN npm run build --prefix admin
+ARG VITE_ADMIN_API_ORIGIN
+RUN test -n "$VITE_ADMIN_API_ORIGIN" && npm run build --prefix admin
 
 FROM nginx:1.27-alpine
 COPY admin/nginx.conf /etc/nginx/conf.d/default.conf
