@@ -1,0 +1,90 @@
+name: Phase 5A Admin authentication and UI
+on:
+  pull_request:
+    paths:
+      - 'admin/**'
+      - 'admin-api/**'
+      - '.github/workflows/admin-auth.yml'
+      - 'design-system/aibawaal-super-admin/**'
+  push:
+    branches:
+      - feat/super-admin-auth-foundation
+
+permissions:
+  contents: read
+
+jobs:
+  admin-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: smartqr_admin_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d smartqr_admin_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:test@127.0.0.1:5432/smartqr_admin_test
+      VITE_ADMIN_API_ORIGIN: https://admin-api.smartqr.liquifyplus.in
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install database and new admin packages
+        run: |
+          npm ci --prefix database --no-audit --no-fund
+          npm ci --prefix admin-api --no-audit --no-fund
+          npm ci --prefix admin --no-audit --no-fund
+      - name: TypeScript checks
+        run: |
+          npm run typecheck --prefix admin-api
+          npm run typecheck --prefix admin
+      - name: Isolated PostgreSQL auth tests
+        run: npm test --prefix admin-api
+      - name: Compile both applications
+        run: |
+          npm run build --prefix admin-api
+          npm run build --prefix admin
+      - name: Existing review regression checks
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+          npm run build:staging
+      - name: Build both Docker images
+        run: |
+          docker build -f admin-api/Dockerfile -t aibawaal-admin-api:test .
+          docker build --build-arg VITE_ADMIN_API_ORIGIN=https://admin-api.smartqr.liquifyplus.in -f admin/Dockerfile -t aibawaal-admin:test .
+      - name: Admin Docker smoke check
+        run: |
+          docker run -d --name admin-ui-smoke -p 127.0.0.1:18080:8080 aibawaal-admin:test
+          trap 'docker rm -f admin-ui-smoke >/dev/null 2>&1 || true' EXIT
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:18080/health | grep -q ok; then exit 0; fi
+            sleep 1
+          done
+          docker logs admin-ui-smoke
+          exit 1
+      - name: Install browser checks
+        run: python3 -m pip install --disable-pip-version-check 'playwright==1.56.0' 'Pillow>=11,<13'
+      - name: Render responsive React login and dashboard
+        run: |
+          npm run preview --prefix admin -- --host 127.0.0.1 --port 4174 > /tmp/admin-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then break; fi
+            sleep 1
+          done
+          PREVIEW_CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable)" python3 admin/test/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase-5a-admin-ui-screenshots
+          path: admin/test/screenshots/*.webp
+          if-no-files-found: ignore
