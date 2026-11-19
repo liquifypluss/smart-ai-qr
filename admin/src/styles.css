@@ -262,3 +262,7 @@ h3{font-size:14px;line-height:1.3;font-weight:750}
 .overview-note{margin:0 0 24px;padding:16px 18px;border:1px solid var(--admin-border);border-radius:var(--admin-radius-md);background:var(--admin-surface);font-size:13px;color:var(--admin-text-secondary)}
 .overview-note strong{color:var(--admin-text)}
 @media(max-width:700px){.login-page{min-height:100dvh}.metric{min-height:120px}.login-form-region{min-height:0}}
+
+.sidebar .nav-link{width:100%;min-height:var(--admin-nav-item-height);border:0;background:transparent;text-align:left;font-family:var(--admin-font-body);cursor:pointer}
+.sidebar .nav-link.current{background:var(--admin-nav-active-bg)}
+.sidebar .nav-link:disabled{background:transparent;opacity:.65;cursor:not-allowed}
