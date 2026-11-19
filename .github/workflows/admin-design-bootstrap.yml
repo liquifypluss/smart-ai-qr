@@ -7,6 +7,7 @@ on:
       - 'docs/admin/**'
       - 'design-system/aibawaal-super-admin/**'
       - '.github/workflows/admin-design-bootstrap.yml'
+      - '.github/workflows/admin-design-previews.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,19 +21,31 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify official skill and design research
+      - name: Verify official skill and approved design system
         run: |
-          test -f AGENTS.md
+          test -s AGENTS.md
           test -s .agents/skills/ui-ux-pro-max/SKILL.md
           test -f .agents/skills/ui-ux-pro-max/scripts/search.py
-          test -s design-system/aibawaal-super-admin/PROPOSAL.md
+          test -s design-system/aibawaal-super-admin/MASTER.md
+          test -s design-system/aibawaal-super-admin/tokens.css
+          test -s design-system/aibawaal-super-admin/tokens.json
           test -s docs/admin/PAGE-SPEC.md
-          for file in docs/admin/design-research/*.md; do test -s "$file"; done
-          python3 .agents/skills/ui-ux-pro-max/scripts/search.py "admin dashboard" --stack react >/dev/null
+          test -s docs/admin/previews/login.html
+          test -s docs/admin/previews/dashboard.html
+          test -s docs/admin/previews/businesses.html
+          python3 .agents/skills/ui-ux-pro-max/scripts/search.py 'admin dashboard' --stack react > /dev/null
           python3 - <<'PY'
+          import json
           from pathlib import Path
-          p = Path('design-system/aibawaal-super-admin/MASTER.md')
-          if p.exists():
-              raise SystemExit('Approval gate: MASTER.md must not be committed until direction is approved')
-          print('Design foundation and approval gate verified')
+          tokens=json.loads(Path('design-system/aibawaal-super-admin/tokens.json').read_text())
+          assert tokens['color']['nav']['$value'] == '#0F172A'
+          assert tokens['color']['primary']['$value'] == '#0369A1'
+          assert 'APPROVED' in Path('design-system/aibawaal-super-admin/MASTER.md').read_text()
+          assert 'APPROVED' in Path('AGENTS.md').read_text()
+          for page in ('login','dashboard','businesses'):
+              text=Path(f'docs/admin/previews/{page}.html').read_text()
+              assert 'demonstration content only' in text
+              assert 'preview.css' in text
+              assert 'tokens.css' in text
+          print('Approved design foundation verified')
           PY

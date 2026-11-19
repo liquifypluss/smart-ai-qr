@@ -1,8 +1,8 @@
 # AIBawaal Super Admin — page and component specification
 
-**Status:** design proposal only; requires explicit approval before Phase 5A implementation.
+**Status:** Direction B approved on 2026-11-19. This document is the page-level blueprint for static previews. Phase 5A implementation remains blocked until the product owner approves the rendered preview designs.
 
-## Proposed global system (Direction B)
+## Approved global system (Direction B)
 - Navigation: 232px desktop sidebar, collapsed to a topbar-triggered modal drawer at tablet/mobile; no fixed desktop sidebar consuming 320px viewport width.
 - Header: 64px height desktop, 56px mobile; product name on left, breadcrumbs in the workspace, profile/logout at the right.
 - Background `#F8FAFC`, work surfaces `#FFFFFF`, nav `#0F172A`; 1px border `#E2E8F0`, minimal shadows only for popovers.

@@ -1,0 +1,59 @@
+name: Render AIBawaal Super Admin design previews
+on:
+  push:
+    branches:
+      - design/super-admin-foundation
+    paths:
+      - 'docs/admin/previews/**'
+      - 'design-system/aibawaal-super-admin/**'
+      - '.github/workflows/admin-design-previews.yml'
+  pull_request:
+    paths:
+      - 'docs/admin/previews/**'
+      - 'design-system/aibawaal-super-admin/**'
+      - '.github/workflows/admin-design-previews.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check 'playwright==1.56.0' 'Pillow>=11,<13'
+          command -v google-chrome || command -v google-chrome-stable
+      - name: Render static previews and verify responsive behavior
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory . > /tmp/admin-preview-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:8765/docs/admin/previews/login.html > /dev/null; then break; fi
+            sleep 1
+          done
+          PREVIEW_CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable)" \
+            python3 docs/admin/previews/preview-test.py
+          test -s docs/admin/previews/screenshots/login-1440.webp
+          test -s docs/admin/previews/screenshots/login-390.webp
+          test -s docs/admin/previews/screenshots/dashboard-1440.webp
+          test -s docs/admin/previews/screenshots/dashboard-390.webp
+          test -s docs/admin/previews/screenshots/businesses-1440.webp
+          test -s docs/admin/previews/screenshots/businesses-390.webp
+      - name: Save first verified screenshot set to feature branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/design/super-admin-foundation'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git ls-files --error-unmatch docs/admin/previews/screenshots/login-1440.webp >/dev/null 2>&1; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/admin/previews/screenshots/*.webp
+          git -c core.hooksPath=/dev/null commit -m 'design: add verified desktop and mobile admin preview screenshots'
+          header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $header" push origin "HEAD:${GITHUB_REF_NAME}"

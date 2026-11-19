@@ -1,6 +1,6 @@
 # AIBawaal Super Admin — design directions (PROPOSED)
 
-**Status: awaiting product owner approval.** Do not create `MASTER.md`, token files, UI components or admin application until a direction is explicitly selected.
+**Status: Direction B — Structured Operations APPROVED on 2026-11-19.** Directions A/C remain archived alternatives. The approved master system and tokens are in `design-system/aibawaal-super-admin/`; browser-renderable previews remain pending product owner sign-off. Phase 5A implementation is not part of PR #6.
 
 ## Research provenance
 Official Codex installation: `npx ui-ux-pro-max-cli init --ai codex`.
@@ -18,7 +18,7 @@ Internal AIBawaal operators managing approximately 100 or more businesses. Daily
 - Suggested identity: slate `#0F172A`, action blue `#2563EB`, background `#F8FAFC`, border `#E2E8F0`.
 - Strength: minimal implementation cost, light and familiar. Risk: can feel like a generic admin template without strong typographic hierarchy and navigation rhythm.
 
-## Direction B — Structured Operations (RECOMMENDED)
+## Direction B — Structured Operations (APPROVED)
 - Based on generated "AIBawaal Structured": accessible/ethical style, high contrast and controlled information density.
 - Persistent deep-navy sidebar on desktop, neutral-white working canvas, blue primary actions, limited semantic status colors.
 - Suggested identity: sidebar `#0F172A`, background `#F8FAFC`, surface `#FFFFFF`, text `#0F172A`, secondary `#475569`, action `#0369A1`, border `#E2E8F0`.
@@ -35,4 +35,4 @@ Internal AIBawaal operators managing approximately 100 or more businesses. Daily
 ## Approval criteria and design constraints
 Evaluate each option for clarity at 320px and 1440px, accessibility, 100+ business search/filter speed, ease of maintenance and differentiation from generic dashboards. Avoid purple gradients, translucent overlays, large decorative charts, invented analytics, bright saturated status pills, gratuitous rounded corners, emoji icons and unnecessary motion.
 
-The proposed final master system is Direction B; it must not be marked approved automatically.
+**Approval record:** The product owner explicitly selected Direction B. Its master specification is now `design-system/aibawaal-super-admin/MASTER.md`. Approval of this visual direction does not authorize authentication or UI implementation; static previews are submitted for separate review.
