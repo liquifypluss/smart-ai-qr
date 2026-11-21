@@ -43,17 +43,9 @@ jobs:
       - name: Install packages with npm
         run: |
           npm ci --prefix database --no-audit --no-fund
-          npm install --prefix admin-api --no-audit --no-fund
-          npm install --prefix admin --no-audit --no-fund
+          npm ci --prefix admin-api --no-audit --no-fund
+          npm ci --prefix admin --no-audit --no-fund
           npm ci --prefix server --no-audit --no-fund
-      - name: Export temporary dependency lockfiles
-        run: |
-          echo 'PHASE5B_API_LOCK_BEGIN'
-          base64 -w 1000 admin-api/package-lock.json
-          echo 'PHASE5B_API_LOCK_END'
-          echo 'PHASE5B_UI_LOCK_BEGIN'
-          base64 -w 1000 admin/package-lock.json
-          echo 'PHASE5B_UI_LOCK_END'
       - name: TypeScript and build checks
         run: |
           npm run typecheck --prefix database
