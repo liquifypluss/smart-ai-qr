@@ -61,7 +61,7 @@ await test('Phase 5B admin management with disposable PostgreSQL', async t => {
     assert.equal(changed.statusCode,200,changed.body)
     assert.equal(changed.json().name,'Retail Updated')
     assert.equal((await send('PATCH',`/businesses/${businessId}`,{destinationUrl:'http://example.invalid'})).statusCode,400)
-    const other=await send('POST','/businesses',{name:'Other Test',slug:`other-${randomUUID().slice(0,9)}`,category:'electronics'})
+    const other=await send('POST','/businesses',{name:'Other Test',slug:`other-${randomUUID().slice(0,8)}`,category:'electronics'})
     assert.equal(other.statusCode,201,other.body)
     otherId=other.json().id
   })
