@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import sharp from 'sharp'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -126,6 +127,36 @@ await test('Phase 5B admin management with disposable PostgreSQL', async t => {
     const detail=await send('GET',`/phrase-libraries/${duplicate.json().id}`)
     assert.equal(detail.statusCode,200,detail.body)
     assert.ok(detail.json().phrases.some((phrase:{phrase:string})=>phrase.phrase==='Shared library opening text'))
+  })
+  await t.test('persistent image upload validates content and preserves public asset metadata', async () => {
+    const image = await sharp({ create: { width: 80, height: 60, channels: 3, background: '#ffffff' } }).png().toBuffer()
+    const boundary = '----smartqr-upload-fixture'
+    const payload = (mime: string, buffer: Buffer) => Buffer.concat([
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="sample.png"\r\nContent-Type: ${mime}\r\n\r\n`),
+      buffer,
+      Buffer.from(`\r\n--${boundary}--\r\n`)
+    ])
+    const upload = async (business: string, mime: string, buffer: Buffer) => app.inject({
+      method: 'POST', url: root + `/businesses/${business}/assets?kind=logo`,
+      headers: { ...headers, 'content-type': `multipart/form-data; boundary=${boundary}` },
+      payload: payload(mime, buffer)
+    })
+    const accepted = await upload(businessId, 'image/png', image)
+    assert.equal(accepted.statusCode, 201, accepted.body)
+    const assetId: string = accepted.json().id
+    const detail = await send('GET', `/businesses/${businessId}`)
+    assert.ok(detail.json().assets.some((asset: { id: string; kind: string }) => asset.id === assetId && asset.kind === 'logo'))
+    const { businessAssets } = await import('../../database/src/schema.js')
+    const [record] = await db.select().from(businessAssets).where(eq(businessAssets.id, assetId))
+    assert.match(record.storageKey, /^uploads\\/[0-9a-f-]{36}\\.webp$/)
+    const bytes = await readFile(join(dir, record.storageKey.slice('uploads/'.length)))
+    assert.equal((await sharp(bytes).metadata()).format, 'webp')
+    assert.equal((await upload(businessId, 'image/svg+xml', Buffer.from('<svg/>'))).statusCode, 400)
+    const unauthorized = await app.inject({
+      method: 'POST', url: root + `/businesses/${businessId}/assets?kind=logo`,
+      headers: { origin, 'content-type': `multipart/form-data; boundary=${boundary}` }, payload: payload('image/png', image)
+    })
+    assert.equal(unauthorized.statusCode, 401)
   })
   await t.test('invalid input and activity audit history are constrained', async () => {
     assert.equal((await send('GET','/businesses?page=-1')).statusCode,400)
