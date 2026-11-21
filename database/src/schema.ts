@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { boolean, check, foreignKey, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core'
+import { boolean, check, foreignKey, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, primaryKey, uuid, varchar } from 'drizzle-orm/pg-core'
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 const updatedAt = () => timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
@@ -122,6 +122,7 @@ export const qrCodes = pgTable('qr_codes', {
   locationId: uuid('location_id'),
   publicId: varchar('public_id', { length: 60 }).notNull().unique(),
   label: text('label'),
+  template: text('template', { enum: ['signature', 'minimal', 'business'] }).notNull().default('signature'),
   status: text('status', { enum: ['active', 'inactive'] }).notNull().default('active'),
   createdAt: createdAt(),
   updatedAt: updatedAt()
@@ -129,7 +130,8 @@ export const qrCodes = pgTable('qr_codes', {
   foreignKey({ columns: [t.businessId, t.locationId], foreignColumns: [businessLocations.businessId, businessLocations.id], name: 'qr_codes_location_owner_fk' }).onDelete('restrict'),
   index('qr_codes_business_status_idx').on(t.businessId, t.status),
   check('qr_codes_public_id_ck', sql`${t.publicId} ~ '^[A-Za-z0-9_-]{24,60}$'`),
-  check('qr_codes_status_ck', sql`${t.status} IN ('active','inactive')`)
+  check('qr_codes_status_ck', sql`${t.status} IN ('active','inactive')`),
+  check('qr_codes_template_ck', sql`${t.template} IN ('signature','minimal','business')`)
 ])
 
 export const reviewSettings = pgTable('review_settings', {
@@ -143,8 +145,38 @@ export const reviewSettings = pgTable('review_settings', {
   check('review_settings_languages_ck', sql`cardinality(${t.languages}) > 0 AND ${t.languages} <@ ARRAY['en','hi','hinglish']::text[]`)
 ])
 
+export const phraseLibraries = pgTable('phrase_libraries', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  slug: varchar('slug', { length: 90 }).notNull().unique(),
+  name: text('name').notNull(),
+  description: text('description').notNull().default(''),
+  industry: varchar('industry', { length: 80 }),
+  ownerBusinessId: uuid('owner_business_id').references(() => businesses.id, { onDelete: 'restrict' }),
+  status: text('status', { enum: ['active', 'inactive'] }).notNull().default('active'),
+  createdAt: createdAt(), updatedAt: updatedAt()
+}, (t) => [
+  index('phrase_libraries_industry_status_idx').on(t.industry, t.status),
+  check('phrase_libraries_slug_ck', sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),
+  check('phrase_libraries_status_ck', sql`${t.status} IN ('active','inactive')`),
+  check('phrase_libraries_name_ck', sql`length(btrim(${t.name})) > 0`)
+])
+
+export const phraseLibraryAssignments = pgTable('phrase_library_assignments', {
+  businessId: uuid('business_id').notNull().references(() => businesses.id, { onDelete: 'restrict' }),
+  libraryId: uuid('library_id').notNull().references(() => phraseLibraries.id, { onDelete: 'restrict' }),
+  priority: integer('priority').notNull().default(100),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: createdAt()
+}, (t) => [
+  primaryKey({ columns: [t.businessId, t.libraryId] }),
+  index('phrase_library_assignments_library_idx').on(t.libraryId),
+  uniqueIndex('phrase_library_assignments_default_uq').on(t.businessId).where(sql`${t.isDefault} = true`),
+  check('phrase_library_assignments_priority_ck', sql`${t.priority} BETWEEN 0 AND 1000`)
+])
+
 export const phraseTemplates = pgTable('phrase_templates', {
   id: uuid('id').defaultRandom().primaryKey(),
+  libraryId: uuid('library_id').references(() => phraseLibraries.id, { onDelete: 'restrict' }),
   businessId: uuid('business_id').references(() => businesses.id, { onDelete: 'restrict' }),
   industry: varchar('industry', { length: 80 }),
   language: text('language', { enum: ['en', 'hi', 'hinglish'] }).notNull(),
@@ -156,11 +188,14 @@ export const phraseTemplates = pgTable('phrase_templates', {
   createdAt: createdAt(),
   updatedAt: updatedAt()
 }, (t) => [
-  uniqueIndex('phrase_templates_global_uq').on(t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NULL`),
-  uniqueIndex('phrase_templates_industry_uq').on(t.industry, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NOT NULL`),
-  uniqueIndex('phrase_templates_business_uq').on(t.businessId, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NOT NULL`),
+  uniqueIndex('phrase_templates_global_uq').on(t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NULL AND ${t.libraryId} IS NULL`),
+  uniqueIndex('phrase_templates_industry_uq').on(t.industry, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NOT NULL AND ${t.libraryId} IS NULL`),
+  uniqueIndex('phrase_templates_business_uq').on(t.businessId, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NOT NULL AND ${t.libraryId} IS NULL`),
+  uniqueIndex('phrase_templates_library_uq').on(t.libraryId, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.libraryId} IS NOT NULL`),
+  index('phrase_templates_library_lookup_idx').on(t.libraryId, t.language, t.rating, t.part, t.isActive),
   index('phrase_templates_lookup_idx').on(t.language, t.rating, t.part, t.isActive),
   check('phrase_templates_scope_ck', sql`${t.businessId} IS NULL OR ${t.industry} IS NULL`),
+  check('phrase_templates_library_scope_ck', sql`${t.libraryId} IS NULL OR (${t.businessId} IS NULL AND ${t.industry} IS NULL)`),
   check('phrase_templates_language_ck', sql`${t.language} IN ('en','hi','hinglish')`),
   check('phrase_templates_rating_ck', sql`${t.rating} BETWEEN 0 AND 5`),
   check('phrase_templates_part_ck', sql`${t.part} IN ('opening','details','item','closing')`),
@@ -189,3 +224,6 @@ export type BusinessAsset = typeof businessAssets.$inferSelect
 export type ReviewSettings = typeof reviewSettings.$inferSelect
 export type PhraseTemplate = typeof phraseTemplates.$inferSelect
 export type AdminUser = typeof adminUsers.$inferSelect
+
+export type PhraseLibrary = typeof phraseLibraries.$inferSelect
+export type PhraseLibraryAssignment = typeof phraseLibraryAssignments.$inferSelect

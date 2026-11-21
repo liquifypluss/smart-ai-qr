@@ -4,6 +4,8 @@ COPY database/package.json database/package-lock.json ./database/
 COPY admin-api/package.json admin-api/package-lock.json ./admin-api/
 RUN npm ci --prefix database --no-audit --no-fund && npm ci --prefix admin-api --no-audit --no-fund
 COPY database/src ./database/src
+COPY src/config/business.ts ./src/config/business.ts
+COPY src/review/phrases.ts src/review/generate.ts ./src/review/
 COPY admin-api/src ./admin-api/src
 COPY admin-api/tsconfig.json ./admin-api/tsconfig.json
 COPY package.json ./package.json

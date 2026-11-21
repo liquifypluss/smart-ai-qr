@@ -28,5 +28,5 @@ export function Icon({ name, className = 'icon' }: { name: IconName; className?:
 }
 
 export function Brand() {
-  return <div className="brand"><span className="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true" width="23" height="23" fill="none"><path d="M3 19 10 5h4l7 14M7 14h10" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round"/></svg></span><span><span className="brand-title" style={{ display: 'block' }}>AIBawaal</span><span className="brand-sub" style={{ display: 'block' }}>SUPER ADMIN</span></span></div>
+  return <div className="brand"><span className="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true" width="23" height="23" fill="none"><path d="M3 19 10 5h4l7 14M7 14h10" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round"/></svg></span><span><span className="brand-title" style={{ display: 'block' }}>AIBawaal</span><span className="brand-sub" style={{ display: 'block' }}>SMART QR</span></span></div>
 }

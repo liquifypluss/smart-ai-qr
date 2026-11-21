@@ -10,7 +10,7 @@ export class AdminApiError extends Error { constructor(public status: number) { 
 
 const origin = (import.meta.env.VITE_ADMIN_API_ORIGIN ?? '').replace(/\/$/, '')
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+export async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!origin || !/^https:\/\/[^/]+$/.test(origin)) throw new Error('VITE_ADMIN_API_ORIGIN is not configured')
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), 12000)
@@ -20,9 +20,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       credentials: 'include',
       cache: 'no-store',
       signal: controller.signal,
-      headers: { ...(options?.body ? { 'content-type': 'application/json' } : {}), ...options?.headers }
+      headers: { ...(options?.body && !(options.body instanceof FormData) ? { 'content-type': 'application/json' } : {}), ...options?.headers }
     })
     if (!response.ok) throw new AdminApiError(response.status)
+    if (response.status === 204) return undefined as T
     return await response.json() as T
   } finally { window.clearTimeout(timeout) }
 }

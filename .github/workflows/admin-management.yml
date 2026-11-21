@@ -1,0 +1,85 @@
+name: Phase 5B Admin management and branded QR
+on:
+  push:
+    branches:
+      - feat/super-admin-management-phase5b
+  pull_request:
+    paths:
+      - 'admin/**'
+      - 'admin-api/**'
+      - 'database/**'
+      - 'server/**'
+      - '.github/workflows/admin-management.yml'
+
+permissions:
+  contents: read
+jobs:
+  management:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: smartqr_management_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d smartqr_management_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:test@127.0.0.1:5432/smartqr_management_test
+      VITE_ADMIN_API_ORIGIN: https://admin-api.smartqr.liquifyplus.in
+      VITE_PUBLIC_API_ORIGIN: https://api.smartqr.liquifyplus.in
+      VITE_CUSTOMER_ORIGIN: https://smartqr.liquifyplus.in
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install packages with npm
+        run: |
+          npm ci --prefix database --no-audit --no-fund
+          npm ci --prefix admin-api --no-audit --no-fund
+          npm ci --prefix admin --no-audit --no-fund
+          npm ci --prefix server --no-audit --no-fund
+      - name: TypeScript and build checks
+        run: |
+          npm run typecheck --prefix database
+          npm run typecheck --prefix admin-api
+          npm run typecheck --prefix admin
+          npm run build --prefix admin-api
+          npm run build --prefix admin
+          npm run build --prefix server
+      - name: Isolated PostgreSQL authentication and management tests
+        run: npm test --prefix admin-api
+      - name: Existing database and customer regression suites
+        run: |
+          npm test --prefix database
+          npm install --no-audit --no-fund
+          npm test
+          npm run build:staging
+      - name: Docker builds
+        run: |
+          docker build -f admin-api/Dockerfile -t aibawaal-admin-api:phase5b .
+          docker build --build-arg VITE_ADMIN_API_ORIGIN=https://admin-api.smartqr.liquifyplus.in --build-arg VITE_PUBLIC_API_ORIGIN=https://api.smartqr.liquifyplus.in --build-arg VITE_CUSTOMER_ORIGIN=https://smartqr.liquifyplus.in -f admin/Dockerfile -t aibawaal-admin:phase5b .
+          docker build -f server/Dockerfile -t smartqr-public-api:phase5b .
+      - name: Browser checks and QR decoding
+        run: |
+          python3 -m pip install --disable-pip-version-check 'playwright==1.56.0' 'Pillow>=11,<13' 'opencv-python-headless>=4.10,<5'
+          npm run preview --prefix admin -- --host 127.0.0.1 --port 4174 > /tmp/admin-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then break; fi
+            sleep 1
+          done
+          PREVIEW_CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable)" python3 admin/test/browser.py
+          python3 admin/test/verify_qr.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase-5b-browser-qr-previews
+          path: admin/test/screenshots/*.webp
+          if-no-files-found: ignore
