@@ -108,7 +108,7 @@ with sync_playwright() as p:
     login.get_by_role('button', name='Sign in to workspace').click()
     login.get_by_role('heading', name='Overview').wait_for()
     login.get_by_role('button', name='Open navigation').click()
-    login.get_by_role('button', name='Sign out').click()
+    login.locator('.mobile-logout').click()
     login.get_by_role('heading', name='Welcome back').wait_for()
     checks += 1
     login.close()
