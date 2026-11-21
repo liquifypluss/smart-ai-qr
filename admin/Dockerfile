@@ -4,6 +4,8 @@ COPY package.json ./package.json
 COPY admin/package.json admin/package-lock.json ./admin/
 RUN npm ci --prefix admin --no-audit --no-fund
 COPY design-system/aibawaal-super-admin/tokens.css ./design-system/aibawaal-super-admin/tokens.css
+COPY src/config/business.ts ./src/config/business.ts
+COPY src/review/phrases.ts src/review/generate.ts ./src/review/
 COPY admin ./admin
 ARG VITE_ADMIN_API_ORIGIN
 ARG VITE_PUBLIC_API_ORIGIN

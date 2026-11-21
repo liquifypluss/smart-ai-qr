@@ -4,7 +4,6 @@ import type { Database } from '../../database/src/client.js'
 import { auditLogs, businesses, businessChoices, businessLocations, phraseLibraries, phraseLibraryAssignments, phraseTemplates, reviewSettings } from '../../database/src/schema.js'
 import { toBusinessConfig } from '../../database/src/business-config.js'
 import { activeLibraryAssignments, resolvePhraseSet } from '../../database/src/phrases.js'
-import { generateReview } from '../../src/review/generate.js'
 import { businessExists, childParams, handleConstraint, mutation, optionalText, pageOptions, pagingQuery, recordAudit, slugField, statusField, textField, uuidParams, type ChildParams, type Guards, type Paging, type Params } from './manage-utils.js'
 import type { Language, Sentiment } from '../../src/review/phrases.js'
 
@@ -19,7 +18,7 @@ const previewQuery = { type: 'object', required: ['language','rating'], addition
 export function registerLibraryRoutes(app: FastifyInstance, db: Database, guards: Guards) {
   app.get<{ Querystring: Paging }>(base, { preHandler: guards.read, schema: { querystring: pagingQuery } }, async request => {
     const { page, limit } = pageOptions(request.query)
-    const terms = [request.query.q && ilike(phraseLibraries.name, `%${request.query.q.trim()}%`), request.query.status && eq(phraseLibraries.status, request.query.status), request.query.category && eq(phraseLibraries.industry, request.query.category)].filter((v): v is NonNullable<typeof v> => !!v)
+    const terms = [request.query.q ? ilike(phraseLibraries.name, `%${request.query.q.trim()}%`) : undefined, request.query.status ? eq(phraseLibraries.status, request.query.status) : undefined, request.query.category ? eq(phraseLibraries.industry, request.query.category) : undefined].filter((v): v is NonNullable<typeof v> => !!v)
     const where = terms.length ? and(...terms) : undefined
     const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(phraseLibraries).where(where)
     const items = await db.select({
@@ -127,6 +126,6 @@ export function registerLibraryRoutes(app: FastifyInstance, db: Database, guards
     const phrases = await resolvePhraseSet(db, { businessId: business.id, industry: business.category, language: request.query.language, rating: request.query.rating, assignedLibraries })
     const phraseLibrary = { [request.query.language]: { [request.query.rating]: phrases } }
     const choiceId = choices.find(choice => choice.code === request.query.choiceId)?.code ?? null
-    return { text: generateReview({ business: mapped, language: request.query.language, rating: request.query.rating, choiceId, phraseLibrary }), source: 'deterministic' }
+    return { business: mapped, language: request.query.language, rating: request.query.rating, choiceId, phraseLibrary, source: 'deterministic' }
   })
 }

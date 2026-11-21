@@ -21,7 +21,6 @@
     "../database/src/phrases.ts",
     "../database/src/business-config.ts",
     "../src/review/phrases.ts",
-    "../src/review/generate.ts",
     "../src/config/business.ts"
   ]
 }

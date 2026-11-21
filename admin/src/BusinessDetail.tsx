@@ -1,3 +1,4 @@
+import { generateReview } from '../../src/review/generate'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { AdminApiError } from './api'
@@ -95,7 +96,7 @@ function BusinessLibraries({ data, csrf, saving, apply, onLibrary }: Props & { o
 }
 function ReviewPreview({businessId,choices}:{businessId:string;choices:Choice[]}) {
   const [language,setLanguage]=useState('en'),[rating,setRating]=useState(5),[choiceId,setChoiceId]=useState(''),[text,setText]=useState(''),[loading,setLoading]=useState(false),[error,setError]=useState('')
-  async function preview(){setLoading(true);setError('');try{const result=await managementApi.preview(businessId,{language,rating,choiceId:choiceId||undefined});setText(result.text)}catch{setError('Preview unavailable. Check your phrase configuration.')}finally{setLoading(false)}}
+  async function preview(){setLoading(true);setError('');try{const result=await managementApi.preview(businessId,{language,rating,choiceId:choiceId||undefined});setText(generateReview({ business: result.business, language: language as 'en'|'hi'|'hinglish', rating: rating as 0|1|2|3|4|5, choiceId: choiceId || null, phraseLibrary: result.phraseLibrary }))}catch{setError('Preview unavailable. Check your phrase configuration.')}finally{setLoading(false)}}
   return <section className="panel management-form"><h2>Review preview</h2><div className="management-fields"><SelectField label="Preview language" value={language} onChange={setLanguage} options={languageOptions.map(x=>({value:x.code,label:x.label}))}/><SelectField label="Preview rating" value={String(rating)} onChange={v=>setRating(Number(v))} options={[0,1,2,3,4,5].map(r=>({value:String(r),label:r===0?'Unrated':`${r} stars`}))}/><SelectField label="Preview choice" value={choiceId} onChange={setChoiceId} options={[{value:'',label:'No selection'},...choices.map(choice=>({value:choice.code,label:choice.label}))]}/></div><ActionRow><button className="btn btn-primary" disabled={loading} onClick={()=>void preview()}>{loading?'Generating…':'Generate preview'}</button></ActionRow><Notice message={error} tone="error"/>{text&&<output className="review-preview-output">{text}</output>}</section>
 }
 function BusinessAssets({data,csrf,saving,apply}:Props) {

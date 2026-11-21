@@ -1,3 +1,5 @@
+import type { BusinessConfig } from '../../src/config/business'
+import type { PhraseLibrarySource } from '../../src/review/phrases'
 import { request } from './api'
 
 export type Page<T> = { items: T[]; total: number; page: number; limit: number }
@@ -49,6 +51,6 @@ export const managementApi = {
   updatePhrase: (csrf: string, id: string, phraseId: string, value: object) => change<Phrase>(`/phrase-libraries/${id}/phrases/${phraseId}`, 'PATCH', csrf, value),
   assignLibrary: (csrf: string, id: string, value: object) => change<LibraryAssignment>(`/businesses/${id}/phrase-libraries`, 'POST', csrf, value),
   unassignLibrary: (csrf: string, id: string, libraryId: string) => change<void>(`/businesses/${id}/phrase-libraries/${libraryId}`, 'DELETE', csrf),
-  preview: (id: string, values: { language: string; rating: number; choiceId?: string }) => get<{ text: string; source: string }>(`/businesses/${id}/review-preview` + query(values)),
+  preview: (id: string, values: { language: string; rating: number; choiceId?: string }) => get<{ business: BusinessConfig; phraseLibrary: PhraseLibrarySource; source: string }>(`/businesses/${id}/review-preview` + query(values)),
   activity: (filters: { page?: number; action?: string; businessId?: string }) => get<Page<Activity>>('/activity' + query(filters))
 }

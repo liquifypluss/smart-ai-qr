@@ -18,7 +18,7 @@ export function registerBusinessRoutes(app: FastifyInstance, db: Database, guard
   const base = '/api/v1/admin/businesses'
   app.get<{ Querystring: Paging }>(base, { preHandler: guards.read, schema: { querystring: pagingQuery } }, async request => {
     const { page, limit } = pageOptions(request.query)
-    const conditions = [request.query.status && eq(businesses.status, request.query.status), request.query.category && eq(businesses.category, request.query.category), request.query.q && ilike(businesses.name, `%${request.query.q.trim()}%`)].filter((v): v is NonNullable<typeof v> => !!v)
+    const conditions = [request.query.status ? eq(businesses.status, request.query.status) : undefined, request.query.category ? eq(businesses.category, request.query.category) : undefined, request.query.q ? ilike(businesses.name, `%${request.query.q.trim()}%`) : undefined].filter((v): v is NonNullable<typeof v> => !!v)
     const where = conditions.length ? and(...conditions) : undefined
     const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(businesses).where(where)
     const data = await db.select({ id: businesses.id, name: businesses.name, slug: businesses.slug, category: businesses.category, primaryColor: businesses.primaryColor, status: businesses.status, createdAt: businesses.createdAt,

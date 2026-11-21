@@ -21,7 +21,7 @@ export async function registerManagement(app: FastifyInstance, db: Database, gua
     } } }
   }, async request => {
     const page = request.query.page ?? 1, limit = request.query.limit ?? 25
-    const filters = [request.query.action && eq(auditLogs.action, request.query.action), request.query.businessId && eq(auditLogs.businessId, request.query.businessId)].filter((v): v is NonNullable<typeof v> => !!v)
+    const filters = [request.query.action ? eq(auditLogs.action, request.query.action) : undefined, request.query.businessId ? eq(auditLogs.businessId, request.query.businessId) : undefined].filter((v): v is NonNullable<typeof v> => !!v)
     const where = filters.length ? and(...filters) : undefined
     const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(auditLogs).where(where)
     const items = await db.select({ id: auditLogs.id, action: auditLogs.action, entityType: auditLogs.entityType, entityId: auditLogs.entityId, businessId: auditLogs.businessId, businessName: businesses.name, details: auditLogs.details, createdAt: auditLogs.createdAt }).from(auditLogs).leftJoin(businesses, eq(businesses.id, auditLogs.businessId)).where(where).orderBy(desc(auditLogs.createdAt), desc(auditLogs.id)).limit(limit).offset((page-1)*limit)

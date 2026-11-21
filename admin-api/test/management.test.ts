@@ -108,7 +108,7 @@ await test('Phase 5B admin management with disposable PostgreSQL', async t => {
     const preview=await send('GET',`/businesses/${businessId}/review-preview?language=en&rating=5`)
     assert.equal(preview.statusCode,200,preview.body)
     assert.equal(preview.json().source,'deterministic')
-    assert.ok(preview.json().text.includes('Shared library opening text'))
+    assert.deepEqual(preview.json().phraseLibrary.en['5'].opening,['Shared library opening text'])
     const inactive=await send('PATCH',`/phrase-libraries/${libraryId}`,{status:'inactive'})
     assert.equal(inactive.statusCode,200,inactive.body)
     const fallback=await resolvePhraseSet(db,{businessId,industry:'electronics',language:'en',rating:5})
