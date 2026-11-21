@@ -156,53 +156,7 @@ export const phraseLibraries = pgTable('phrase_libraries', {
   createdAt: createdAt(), updatedAt: updatedAt()
 }, (t) => [
   index('phrase_libraries_industry_status_idx').on(t.industry, t.status),
-  check('phrase_libraries_slug_ck', sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*
-  id: uuid('id').defaultRandom().primaryKey(),
-  businessId: uuid('business_id').references(() => businesses.id, { onDelete: 'restrict' }),
-  industry: varchar('industry', { length: 80 }),
-  language: text('language', { enum: ['en', 'hi', 'hinglish'] }).notNull(),
-  rating: integer('rating').notNull(),
-  part: text('part', { enum: ['opening', 'details', 'item', 'closing'] }).notNull(),
-  phrase: text('phrase').notNull(),
-  sortOrder: integer('sort_order').notNull(),
-  isActive: boolean('is_active').notNull().default(true),
-  createdAt: createdAt(),
-  updatedAt: updatedAt()
-}, (t) => [
-  uniqueIndex('phrase_templates_global_uq').on(t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NULL`),
-  uniqueIndex('phrase_templates_industry_uq').on(t.industry, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NULL AND ${t.industry} IS NOT NULL`),
-  uniqueIndex('phrase_templates_business_uq').on(t.businessId, t.language, t.rating, t.part, t.sortOrder).where(sql`${t.businessId} IS NOT NULL`),
-  index('phrase_templates_lookup_idx').on(t.language, t.rating, t.part, t.isActive),
-  check('phrase_templates_scope_ck', sql`${t.businessId} IS NULL OR ${t.industry} IS NULL`),
-  check('phrase_templates_language_ck', sql`${t.language} IN ('en','hi','hinglish')`),
-  check('phrase_templates_rating_ck', sql`${t.rating} BETWEEN 0 AND 5`),
-  check('phrase_templates_part_ck', sql`${t.part} IN ('opening','details','item','closing')`),
-  check('phrase_templates_phrase_ck', sql`length(btrim(${t.phrase})) > 0`),
-  check('phrase_templates_order_ck', sql`${t.sortOrder} >= 0`)
-])
-
-export const auditLogs = pgTable('audit_logs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  adminId: uuid('admin_id').references(() => adminUsers.id, { onDelete: 'restrict' }),
-  businessId: uuid('business_id').references(() => businesses.id, { onDelete: 'restrict' }),
-  action: varchar('action', { length: 100 }).notNull(),
-  entityType: varchar('entity_type', { length: 80 }).notNull(),
-  entityId: uuid('entity_id'),
-  details: jsonb('details').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-  createdAt: createdAt()
-}, (t) => [
-  index('audit_logs_business_time_idx').on(t.businessId, t.createdAt),
-  index('audit_logs_admin_time_idx').on(t.adminId, t.createdAt)
-])
-
-export type Business = typeof businesses.$inferSelect
-export type BusinessLocation = typeof businessLocations.$inferSelect
-export type BusinessChoice = typeof businessChoices.$inferSelect
-export type BusinessAsset = typeof businessAssets.$inferSelect
-export type ReviewSettings = typeof reviewSettings.$inferSelect
-export type PhraseTemplate = typeof phraseTemplates.$inferSelect
-export type AdminUser = typeof adminUsers.$inferSelect
-`),
+  check('phrase_libraries_slug_ck', sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),
   check('phrase_libraries_status_ck', sql`${t.status} IN ('active','inactive')`),
   check('phrase_libraries_name_ck', sql`length(btrim(${t.name})) > 0`)
 ])
