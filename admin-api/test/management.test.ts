@@ -148,7 +148,7 @@ await test('Phase 5B admin management with disposable PostgreSQL', async t => {
     assert.ok(detail.json().assets.some((asset: { id: string; kind: string }) => asset.id === assetId && asset.kind === 'logo'))
     const { businessAssets } = await import('../../database/src/schema.js')
     const [record] = await db.select().from(businessAssets).where(eq(businessAssets.id, assetId))
-    assert.match(record.storageKey, /^uploads\\/[0-9a-f-]{36}\\.webp$/)
+    assert.match(record.storageKey, /^uploads\/[0-9a-f-]{36}\.webp$/)
     const bytes = await readFile(join(dir, record.storageKey.slice('uploads/'.length)))
     assert.equal((await sharp(bytes).metadata()).format, 'webp')
     assert.equal((await upload(businessId, 'image/svg+xml', Buffer.from('<svg/>'))).statusCode, 400)
