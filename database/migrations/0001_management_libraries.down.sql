@@ -1,0 +1,18 @@
+BEGIN;
+DROP TRIGGER IF EXISTS "phrase_library_assignment_check" ON "phrase_library_assignments";
+DROP FUNCTION IF EXISTS "check_phrase_library_assignment"();
+ALTER TABLE "qr_codes" DROP CONSTRAINT IF EXISTS "qr_codes_template_ck";
+ALTER TABLE "qr_codes" DROP COLUMN IF EXISTS "template";
+DROP INDEX IF EXISTS "phrase_templates_library_lookup_idx";
+DROP INDEX IF EXISTS "phrase_templates_library_uq";
+DROP INDEX IF EXISTS "phrase_templates_global_uq";
+DROP INDEX IF EXISTS "phrase_templates_industry_uq";
+DROP INDEX IF EXISTS "phrase_templates_business_uq";
+ALTER TABLE "phrase_templates" DROP CONSTRAINT IF EXISTS "phrase_templates_library_scope_ck";
+ALTER TABLE "phrase_templates" DROP COLUMN IF EXISTS "library_id";
+CREATE UNIQUE INDEX "phrase_templates_global_uq" ON "phrase_templates"("language", "rating", "part", "sort_order") WHERE "business_id" IS NULL AND "industry" IS NULL;
+CREATE UNIQUE INDEX "phrase_templates_industry_uq" ON "phrase_templates"("industry", "language", "rating", "part", "sort_order") WHERE "business_id" IS NULL AND "industry" IS NOT NULL;
+CREATE UNIQUE INDEX "phrase_templates_business_uq" ON "phrase_templates"("business_id", "language", "rating", "part", "sort_order") WHERE "business_id" IS NOT NULL;
+DROP TABLE "phrase_library_assignments";
+DROP TABLE "phrase_libraries";
+COMMIT;

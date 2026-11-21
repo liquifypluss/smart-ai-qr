@@ -18,11 +18,13 @@ export async function getPublicAsset(db: Database, config: ServerConfig, id: str
     )).limit(1)
     if (!choice) return null
   }
-  if (!/^src\/assets\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(svg|webp|png|jpe?g)$/.test(asset.storageKey)) return null
+  const uploaded = /^uploads\/[0-9a-f-]{36}\.webp$/.test(asset.storageKey)
+  if (!uploaded && !/^src\/assets\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(svg|webp|png|jpe?g)$/.test(asset.storageKey)) return null
+  if (uploaded && !config.uploadAssetRoot) return null
   const ext = asset.storageKey.split('.').at(-1)!
   if (asset.mimeType !== mediaTypes[ext]) return null
-  const root = await realpath(config.assetRoot)
-  const target = resolve(root, asset.storageKey.slice('src/assets/'.length))
+  const root = await realpath(uploaded ? config.uploadAssetRoot! : config.assetRoot)
+  const target = resolve(root, uploaded ? asset.storageKey.slice('uploads/'.length) : asset.storageKey.slice('src/assets/'.length))
   try {
     const absolute = await realpath(target)
     const path = relative(root, absolute)

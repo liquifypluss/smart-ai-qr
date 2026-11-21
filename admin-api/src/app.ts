@@ -10,6 +10,7 @@ import type pg from 'pg'
 import type { Database } from '../../database/src/client.js'
 import { adminSessions, adminUsers, auditLogs, businesses, businessLocations, qrCodes } from '../../database/src/schema.js'
 import type { AdminConfig } from './config.js'
+import { registerManagement } from './management.js'
 import { createSession, csrfToken, digestEmail, normalizeEmail, passwordOptions, readSession, sessionCookie, validCsrf, type VerifiedSession } from './security.js'
 
 declare module 'fastify' { interface FastifyRequest { adminSession?: VerifiedSession } }
@@ -27,7 +28,7 @@ export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.
   const app = Fastify({
     logger: logging ? { level: config.logLevel, redact: ['req.headers.authorization', 'req.headers.cookie', 'req.headers.x-csrf-token', 'res.headers.set-cookie', 'req.body.password', 'databaseUrl'] } : false,
     trustProxy: config.trustProxy ? (_address: string, hop: number) => hop === 0 : false,
-    bodyLimit: 4096, requestTimeout: 10000, connectionTimeout: 10000
+    bodyLimit: 4_000_000, requestTimeout: 10000, connectionTimeout: 10000
   })
   const dummyHash = await argon2.hash(randomBytes(32), passwordOptions)
   app.addHook('onClose', async () => { await pool.end() })
@@ -35,7 +36,7 @@ export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.
   await app.register(cookie)
   await app.register(cors, {
     origin: (origin, callback) => callback(null, origin === config.webOrigin),
-    credentials: true, methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['content-type', 'x-csrf-token'], strictPreflight: true
+    credentials: true, methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'], allowedHeaders: ['content-type', 'x-csrf-token'], strictPreflight: true
   })
   await app.register(rateLimit, { global: false, errorResponseBuilder: () => ({ statusCode: 429, error: 'Too many requests' }) })
   app.addHook('onSend', async (_request, reply) => { reply.header('Cache-Control', 'no-store'); reply.header('Pragma', 'no-cache') })
@@ -44,6 +45,7 @@ export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.
     if (issue.validation) return reply.code(400).send({ error: 'Invalid request' })
     if (issue.statusCode === 429) return reply.code(429).send({ error: 'Too many requests' })
     if (issue.statusCode === 415) return reply.code(415).send({ error: 'Unsupported media type' })
+    if (issue.statusCode === 413) return reply.code(413).send({ error: 'File exceeds upload limit' })
     request.log.error({ err: error }, 'Admin request failed')
     return reply.code(500).send({ error: 'Internal server error' })
   })
@@ -125,6 +127,7 @@ export async function buildAdminApp(config: AdminConfig, db: Database, pool: pg.
     const row = counts.rows[0] as Record<string, number>
     return { metrics: { totalBusinesses: row.total_businesses, activeBusinesses: row.active_businesses, totalLocations: row.total_locations, totalQrCodes: row.total_qr_codes, activeQrCodes: row.active_qr_codes }, recentBusinesses: recent, recentActivity: activity }
   })
+  await registerManagement(app, db, { read: superAdmin, write: async (request, reply) => { await superAdmin(request, reply); if (!reply.sent) checkCsrf(request, reply) } }, config.uploadDir)
   return app
 }
 

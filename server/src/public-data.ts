@@ -1,6 +1,6 @@
 import { and, asc, eq } from 'drizzle-orm'
 import { toBusinessConfig } from '../../database/src/business-config.js'
-import { resolvePhraseSet } from '../../database/src/phrases.js'
+import { activeLibraryAssignments, resolvePhraseSet } from '../../database/src/phrases.js'
 import { businesses, businessLocations, businessChoices, businessAssets, reviewSettings, qrCodes } from '../../database/src/schema.js'
 import type { Database } from '../../database/src/client.js'
 import type { Business, BusinessLocation } from '../../database/src/schema.js'
@@ -29,9 +29,10 @@ export async function getPublicPayload(db: Database, config: ServerConfig, busin
     }
   })
   const languages = supportedLanguages.filter((language) => settings.languages.includes(language))
+  const assignedLibraries = await activeLibraryAssignments(db, business.id)
   const records = await Promise.all(languages.flatMap((language) => ratings.map(async (rating) => ({
     language, rating,
-    phrases: await resolvePhraseSet(db, { businessId: business.id, industry: business.category, language, rating })
+    phrases: await resolvePhraseSet(db, { businessId: business.id, industry: business.category, language, rating, assignedLibraries })
   }))))
   const phraseLibrary: Record<string, Record<string, typeof records[number]['phrases']>> = {}
   for (const { language, rating, phrases } of records) {

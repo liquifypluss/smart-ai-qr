@@ -9,6 +9,7 @@ export type ServerConfig = {
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   trustProxy: boolean
   assetRoot: string
+  uploadAssetRoot?: string
   rateLimit: number
 }
 
@@ -52,6 +53,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     logLevel: logLevel as ServerConfig['logLevel'],
     trustProxy: env.TRUST_PROXY === '1',
     assetRoot: resolve(env.ASSET_ROOT ?? '../src/assets'),
+    uploadAssetRoot: env.UPLOAD_ASSET_ROOT ? resolve(env.UPLOAD_ASSET_ROOT) : undefined,
     rateLimit
   }
 }

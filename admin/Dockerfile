@@ -6,6 +6,8 @@ RUN npm ci --prefix admin --no-audit --no-fund
 COPY design-system/aibawaal-super-admin/tokens.css ./design-system/aibawaal-super-admin/tokens.css
 COPY admin ./admin
 ARG VITE_ADMIN_API_ORIGIN
+ARG VITE_PUBLIC_API_ORIGIN
+ARG VITE_CUSTOMER_ORIGIN
 RUN test -n "$VITE_ADMIN_API_ORIGIN" && npm run build --prefix admin
 
 FROM nginx:1.27-alpine

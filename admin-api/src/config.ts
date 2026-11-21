@@ -1,5 +1,6 @@
 export type AdminConfig = {
   databaseUrl: string
+  uploadDir?: string
   webOrigin: string
   csrfSecret: Buffer
   host: string
@@ -26,5 +27,5 @@ export function readAdminConfig(env: NodeJS.ProcessEnv = process.env): AdminConf
   const levels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const
   const logLevel = env.LOG_LEVEL ?? 'info'
   if (!levels.some((v) => v === logLevel)) throw new Error('Invalid LOG_LEVEL')
-  return { databaseUrl, webOrigin, csrfSecret, host: env.HOST ?? '0.0.0.0', port, trustProxy: env.TRUST_PROXY === '1', logLevel: logLevel as AdminConfig['logLevel'] }
+  return { databaseUrl, uploadDir: env.ADMIN_UPLOAD_DIR || undefined, webOrigin, csrfSecret, host: env.HOST ?? '0.0.0.0', port, trustProxy: env.TRUST_PROXY === '1', logLevel: logLevel as AdminConfig['logLevel'] }
 }

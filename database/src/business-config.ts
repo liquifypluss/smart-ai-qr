@@ -16,13 +16,13 @@ export function toBusinessConfig({ business, locations, choices, assets, setting
   const location = locations.find((entry) => entry.businessId === business.id && entry.isPrimary && entry.status === 'active')
     ?? locations.find((entry) => entry.businessId === business.id && entry.status === 'active')
   const ownedAssets = assets.filter((asset) => asset.businessId === business.id)
-  const mainLogo = ownedAssets.find((asset) => asset.kind === 'logo')
+  const mainLogo = ownedAssets.find((asset) => asset.kind === 'logo' && asset.variant === 'default') ?? ownedAssets.find((asset) => asset.kind === 'logo')
   const headerImages = ownedAssets.filter((asset) => asset.kind === 'header_image').sort((a, b) => (a.width ?? 0) - (b.width ?? 0))
-  const header = headerImages.at(-1)
+  const header = headerImages.find((asset) => asset.variant === 'default') ?? headerImages.at(-1)
   const mappedChoices: Choice[] = choices.filter((choice) => choice.businessId === business.id && choice.status === 'active')
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((choice) => {
-      const logo = ownedAssets.find((asset) => asset.choiceId === choice.id && asset.kind === 'choice_logo')
+      const logo = ownedAssets.find((asset) => asset.choiceId === choice.id && asset.kind === 'choice_logo' && asset.variant === 'default') ?? ownedAssets.find((asset) => asset.choiceId === choice.id && asset.kind === 'choice_logo')
       const image = ownedAssets.find((asset) => asset.choiceId === choice.id && asset.kind === 'choice_image')
       return {
         id: choice.code,
@@ -44,7 +44,7 @@ export function toBusinessConfig({ business, locations, choices, assets, setting
     ...(mainLogo ? { logo: assetUrl(mainLogo.storageKey) } : {}),
     ...(header ? { headerImage: {
       src: assetUrl(header.storageKey),
-      ...(headerImages.length > 1 ? { srcSet: headerImages.filter((entry) => entry.width).map((entry) => `${assetUrl(entry.storageKey)} ${entry.width}w`).join(', ') } : {})
+      ...(!headerImages.some((entry) => entry.variant === 'default') && headerImages.length > 1 ? { srcSet: headerImages.filter((entry) => entry.width).map((entry) => `${assetUrl(entry.storageKey)} ${entry.width}w`).join(', ') } : {})
     } } : {}),
     destinationUrl: location?.destinationUrl ?? business.destinationUrl,
     choices: mappedChoices

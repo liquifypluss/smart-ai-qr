@@ -33,5 +33,5 @@ export default function App() {
   if (state === 'loading') return <div className="auth-status" role="status"><section className="panel"><h1>AIBawaal</h1><p>Checking your secure session…</p></section></div>
   if (state === 'error') return <div className="auth-status"><section className="panel"><h1>Connection unavailable</h1><p>We couldn't verify your session. Check your connection and reload.</p><button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button></section></div>
   if (!session) return <Login onSuccess={(value) => { setSession(value); setNotice('') }} notice={notice} />
-  return <Dashboard user={session.user} onExpired={expire} onLogout={logout} />
+  return <Dashboard user={session.user} csrf={session.csrfToken} onExpired={expire} onLogout={logout} />
 }

@@ -9,7 +9,19 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "../database/src/client.ts", "../database/src/schema.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "../database/src/client.ts",
+    "../database/src/schema.ts",
+    "../database/src/phrases.ts",
+    "../database/src/business-config.ts",
+    "../src/review/phrases.ts",
+    "../src/review/generate.ts",
+    "../src/config/business.ts"
+  ]
 }
